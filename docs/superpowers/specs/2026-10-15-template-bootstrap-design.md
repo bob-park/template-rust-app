@@ -83,6 +83,66 @@
 - `AGENTS.md`, `CLAUDE.md`, `docs/agents/**`
 - README: 템플릿 소개와 "새 앱으로 만들 때 바꿀 것" 체크리스트
 
+### 패키지 구조 (사용자 승인)
+
+**프론트엔드**: `/Users/hwpark/Documents/webstorm-workspace/template-nextjs-app` 구조를 Tauri SPA에 맞게 옮긴다.
+
+```
+src/
+├─ app/            # main.tsx, App.tsx, _layouts/ (App 전용 하위 컴포넌트)
+├─ domain/<name>/
+│  ├─ apis/        # <name>.ts (Tauri command 호출) + <name>.dto.ts
+│  ├─ queries/     # React Query 훅
+│  ├─ components/
+│  └─ store/       # Zustand slice
+├─ shared/         # api/ (invoke 래퍼·에러 타입), components/, providers/, hooks/, queries/, store/(rootStore)
+└─ utils/          # 순수 함수만
+```
+
+- nextjs 템플릿과 다른 점은 `apis/`다. ky로 HTTP를 호출하는 대신 Tauri command를 호출한다.
+- 예제 도메인은 `settings`(greeting, theme)다.
+- 테마는 nextjs처럼 `shared/providers/theme/ThemeProvider.tsx`와 `shared/components/theme/ThemeSwitcher.tsx`에 둔다.
+- nextjs 템플릿의 규칙을 함께 가져온다.
+  - 경로 별칭 `@/`
+  - 파일 이름 규칙(`*.dto.ts`, `PascalCase.tsx`, `useXxx.tsx`)
+  - `_layouts/`
+  - React 섹션 주석 순서. 단, Server Component 관련 부분은 제외한다.
+  - 새 도메인은 하위 폴더 4개(`apis`, `queries`, `components`, `store`)를 모두 만든다.
+- 추가 라이브러리는 nextjs 템플릿과 같은 것을 쓴다.
+  - `@tanstack/react-query`(+ devtools)
+  - `zustand`, `immer`, `classnames`
+  - ESLint/Prettier: `@bob-park/eslint-config-bobpark`, `@bob-park/prettier-config-bobpark`
+  - GitHub Packages 레지스트리를 쓴다. `.yarnrc.yml`의 `npmScopes`와 `GITHUB_NPM_AUTH_TOKEN` 설정도 nextjs와 같게 한다.
+
+**백엔드(Rust)**: 프론트와 같은 도메인 이름으로 짝을 맞춘다.
+
+```
+src-tauri/src/
+├─ main.rs
+├─ lib.rs                 # 조립만: 플러그인, setup, command 등록
+├─ app/                   # 앱 껍데기: state.rs, window.rs, tray.rs, updater.rs
+├─ domain/<name>/
+│  ├─ mod.rs
+│  ├─ model.rs            # 타입·검증 (순수 Rust)
+│  ├─ repository.rs       # 이 도메인의 SQL (&Connection을 받음)
+│  └─ commands.rs         # #[tauri::command] 얇은 어댑터
+└─ shared/
+   ├─ db.rs               # DB 열기 + 마이그레이션 실행
+   ├─ migrations/0001_init.sql …
+   └─ error.rs            # AppError (thiserror) → { code, message }로 직렬화
+```
+
+규칙은 다음과 같다.
+
+- **의존 방향은 한쪽으로만 흐른다.** `commands` → `model`/`repository` → `shared::db` 순서다.
+  - `tauri`를 import하는 곳은 `commands.rs`, `app/`, `lib.rs`뿐이다.
+  - 그래서 도메인 로직은 Tauri 없이 메모리 DB로 테스트할 수 있다.
+- **도메인끼리 서로의 repository를 직접 쓰지 않는다.** 다른 도메인이 필요하면 그 도메인의 `mod.rs`가 공개한 함수만 쓴다.
+- **`service.rs`는 처음부터 만들지 않는다.** 여러 repository를 묶는 로직이 생길 때 그 도메인에 추가한다.
+- **마이그레이션은 파일 하나가 버전 하나다.** `include_str!`로 읽고 `PRAGMA user_version`으로 적용한다. 배포된 마이그레이션 파일은 고치지 않는다.
+- **command 에러는 `AppError`로 반환한다.** 직렬화하면 `{ code, message }` 형태가 된다. 프론트의 `shared/api`는 이 형태를 `AppError` 타입으로 받는다.
+- 추가 crate는 `thiserror` 하나다.
+
 ## 비목표
 
 - vee-app에만 있는 기능은 넣지 않는다.
@@ -137,7 +197,7 @@
   - GitHub repo: `bob-park/template-rust-app`
   - sign.env 디렉터리: `~/.config/template-rust-app/`
   - 바꿀 위치 목록은 README와 `docs/agents/overview.md`에 둔다.
-- **SQLite 모듈.** `store.rs`는 Tauri에 의존하지 않게 만들고 `tempfile`로 단위 테스트한다.
+- **SQLite.** DB 열기와 마이그레이션은 `shared/db.rs`, 도메인 SQL은 `domain/<name>/repository.rs`에 둔다. 테스트는 메모리 DB(`Connection::open_in_memory`)나 `tempfile`로 한다.
 - **플러그인.** `tauri-plugin-single-instance`, `tauri-plugin-log`, `tauri-plugin-updater`만 넣는다. 트레이는 `tray-icon` feature를 쓴다. 두 번째로 실행하면 기존 창을 연다.
 - **트레이 라벨**은 영어다. i18n이 필요해지면 vee-app의 `i18n/` 패턴을 따르라고 규칙 문서에 적는다.
 - **테마 적용.**
@@ -184,7 +244,7 @@
 ## 빌더에게 맡기는 것
 
 - 각 규칙 문서의 구체적인 문구와 예시. 단, 실제 뼈대 코드와 일치해야 한다.
-- 뼈대 코드의 세부 구현. vee-app의 `lib.rs`, `tray.rs`, `updater.rs`, `store.rs`를 축소해 가져오는 방식을 권장한다.
+- 뼈대 코드의 세부 구현. vee-app의 `lib.rs`, `tray.rs`, `updater.rs`, `store.rs`를 위 패키지 구조에 맞게 나눠 가져오는 방식을 권장한다.
 - 다크 테마의 구체적인 색 값
 - `.gitignore` 정리. vee-app의 것에서 무관한 항목(Babelay, kiri 등)은 뺀다.
 
