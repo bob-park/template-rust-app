@@ -1,0 +1,83 @@
+@import 'tailwindcss';
+@plugin 'daisyui' {
+  themes: false;
+}
+
+/* Tokens from docs/design/kraken-design.md. Colors live here only. */
+@plugin 'daisyui/theme' {
+  name: 'light';
+  default: true;
+  prefersdark: false;
+  color-scheme: light;
+
+  --color-base-100: #ffffff;
+  --color-base-200: #f5f5f8;
+  --color-base-300: #dedee5;
+  --color-base-content: #101114;
+  --color-primary: #7132f5;
+  --color-primary-content: #ffffff;
+  --color-secondary: #5741d8;
+  --color-secondary-content: #ffffff;
+  --color-accent: #5b1ecf;
+  --color-accent-content: #ffffff;
+  --color-neutral: #686b82;
+  --color-neutral-content: #ffffff;
+  --color-info: #3b82f6;
+  --color-info-content: #ffffff;
+  --color-success: #149e61;
+  --color-success-content: #ffffff;
+  --color-warning: #f59e0b;
+  --color-warning-content: #101114;
+  --color-error: #e5484d;
+  --color-error-content: #ffffff;
+
+  --radius-selector: 1rem;
+  --radius-field: 0.75rem;
+  --radius-box: 1rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 1;
+  --noise: 0;
+}
+
+@plugin 'daisyui/theme' {
+  name: 'dark';
+  default: false;
+  prefersdark: true;
+  color-scheme: dark;
+
+  --color-base-100: #101114;
+  --color-base-200: #1a1b20;
+  --color-base-300: #2a2c35;
+  --color-base-content: #f4f4f7;
+  --color-primary: #8b5cf6;
+  --color-primary-content: #ffffff;
+  --color-secondary: #7c6cf0;
+  --color-secondary-content: #ffffff;
+  --color-accent: #a78bfa;
+  --color-accent-content: #101114;
+  --color-neutral: #9497a9;
+  --color-neutral-content: #101114;
+  --color-info: #60a5fa;
+  --color-info-content: #101114;
+  --color-success: #22c27e;
+  --color-success-content: #101114;
+  --color-warning: #fbbf24;
+  --color-warning-content: #101114;
+  --color-error: #f87171;
+  --color-error-content: #101114;
+
+  --radius-selector: 1rem;
+  --radius-field: 0.75rem;
+  --radius-box: 1rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
+  --depth: 1;
+  --noise: 0;
+}
+
+@theme {
+  --font-sans: 'IBM Plex Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+}

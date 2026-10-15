@@ -1,0 +1,22 @@
+# Rust
+target/
+**/*.rs.bk
+*.pdb
+
+# Node / Vite
+node_modules/
+.yarn/
+.pnp.*
+dist/
+*.tsbuildinfo
+*.log
+
+# Tauri
+src-tauri/gen/
+
+# IDE / OS
+.idea/
+.DS_Store
+
+# superpowers scratch (brainstorm mockups, plan ledgers)
+.superpowers/
