@@ -270,3 +270,31 @@ src-tauri/src/
   - **테마 선택기 위치:** 설정 창으로 옮긴다. 메인 창에는 Hello만 남는다.
   - **창 간 테마 동기화:** `set_theme` 성공 시 Rust가 `settings://theme-changed`(payload: Theme)를 모든 창에 emit한다. 각 창의 프론트는 이를 받아 React Query 캐시를 갱신한다. 창마다 상태가 따로이기 때문이다.
   - **창 분기:** `main.tsx`에서 `getCurrentWindow().label`로 화면을 나눈다. `main`이면 `src/app/App.tsx`, `settings`면 `src/app/settings/SettingsApp.tsx`를 띄운다.
+- **설정 창의 Updates 섹션(사용자 요청, vee-app 방식)**:
+  - 표시하는 정보: 현재 버전과 업데이트 상태(최신 / 새 버전 준비됨 / 확인 실패)
+  - 버튼: "Check for Updates". 내려받기가 끝나면 "Restart to Update"로 바뀐다.
+  - **자동 업데이트 토글**(vee-app에는 없음, 사용자 요청):
+    - 저장: `settings.auto_update`에 둔다. 행이 없으면 켜진 것으로 본다.
+    - 동작: 꺼져 있으면 6시간 주기 확인을 건너뛴다. 수동 확인은 항상 할 수 있다.
+  - 상태 변경은 `update://status` 이벤트로 모든 창에 알린다.
+  - 프론트 도메인 `src/domain/updater`는 Rust `app/updater.rs`의 command와 짝을 이룬다. updater는 앱 껍데기라서 Rust 쪽은 `domain/`이 아니다.
+- **i18n과 언어 선택(사용자 요청)**:
+  - 지원 언어: 한국어와 영어. `settings.locale`(`system|en|ko`, 행이 없으면 `system`)에 저장한다.
+  - 프론트:
+    - 사전: `src/shared/i18n/{en,ko}.ts`. `ko`는 `Dict = typeof en` 타입이라 키가 빠지면 컴파일 에러가 난다.
+    - 언어 결정: `resolveLocale`
+    - 제공: `I18nProvider`와 `useI18n()`
+  - Rust: 트레이와 앱 메뉴 라벨도 현지화한다. `system`일 때 OS 언어는 `sys-locale` crate로 읽는다(vee와 같음).
+  - 변경 전파: `settings://locale-changed` 이벤트로 모든 창에 알린다.
+  - 이 항목으로 "i18n 없음" 비목표는 철회한다.
+- **설정 UI(사용자 요청)**:
+  - 레이아웃: vee-app처럼 행마다 왼쪽에 라벨, 오른쪽에 컨트롤을 둔다.
+  - 선택형 설정(테마, 언어): `Segmented` 라디오 그룹(`role="radiogroup"`)을 쓴다.
+- **기본 UI는 vee-app과 같게(사용자 요청)**:
+  - 색: vee의 라이트·다크 팔레트를 daisyUI 테마와 추가 토큰(card/muted/divider/subtle/accent-subtle)으로 옮긴다.
+  - 글꼴: Helvetica Neue 13px. kraken의 IBM Plex보다 우선한다.
+  - 컴포넌트: 설정 창의 탭 바, 행, 섹션 카드, segmented, 스위치, 버튼은 vee `settings.css`의 치수를 그대로 쓴다.
+  - 탭: General(테마, 언어, 로그인 시 자동 실행)과 Updates. 창을 열 때마다 General부터 보여 준다.
+- **로그인 시 자동 실행(사용자 요청)**:
+  - `tauri-plugin-autostart`를 쓴다(macOS는 LaunchAgent, vee와 같음).
+  - 켜짐 여부는 DB가 아니라 플러그인에서 읽는다.

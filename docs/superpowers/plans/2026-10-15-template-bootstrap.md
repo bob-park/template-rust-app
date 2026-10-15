@@ -693,3 +693,22 @@ Folded into existing tasks:
   - Add the `settings` window to tauri.conf (`create: false`, 480×360, `resizable: false`, `center`) and capabilities. `window.rs` gets `pub const SETTINGS`, `show_settings(app)`, and close→hide for both windows.
   - App menu (`app/menu.rs`, `pub fn build(app) -> tauri::Result<Menu<Wry>>`): the default menu plus a "Settings…" item, accelerator `CmdOrCtrl+,`, id `settings`. Set it with `.menu(app::menu::build)`. `.on_menu_event` routes `settings` to `show_settings`.
   - Tray gets a "Settings" item (id `settings`).
+
+## Addendum 2 (user request mid-execution): Updates section in Settings
+
+Folded into Task 4:
+- **Rust, settings domain:**
+  - `auto_update(conn) -> AppResult<bool>`: a missing row → `true`.
+  - `set_auto_update(conn, enabled: bool) -> AppResult<bool>`.
+  - Commands `get_auto_update`, `set_auto_update`.
+  - Tests: `auto_update_defaults_to_true`, `set_auto_update_round_trips`.
+- **Rust, `app/updater.rs`:**
+  - `set_status` emits `update://status`.
+  - Commands `check_update`, `get_update_status`, `install_update_and_restart`, as in vee.
+  - `spawn_periodic` skips the check when `settings::auto_update` is false.
+- **Frontend, `src/domain/updater`:**
+  - `apis/updater.dto.ts`: the `UpdateStatus` union.
+  - `apis/updater.ts`.
+  - `queries/updater.tsx`: status query plus event listener, check/install mutations.
+  - `components/UpdateSection.tsx`: version via `@tauri-apps/api/app` `getVersion`, status, button, auto-update toggle.
+  - `src/utils/updateStatus.ts`: `describeUpdateStatus(s)`, a pure function with a `node:test`.

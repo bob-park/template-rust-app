@@ -18,7 +18,9 @@ log = "0.4"
 thiserror = "2"
 tauri-plugin-single-instance = "2.5.2"
 tauri-plugin-log = "2.10.0"
+tauri-plugin-autostart = "2.7.0"
 tauri-plugin-updater = "2.13.1"
+sys-locale = "0.3.2"
 rusqlite = { version = "0.40.2", features = ["bundled"] }
 
 [dev-dependencies]

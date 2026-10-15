@@ -4,7 +4,7 @@ pub mod commands;
 mod model;
 pub mod repository;
 
-pub use model::Theme;
+pub use model::{LocalePref, Theme};
 
 use crate::shared::error::{AppError, AppResult};
 use rusqlite::Connection;
@@ -24,6 +24,26 @@ pub fn set_theme(conn: &Connection, raw: &str) -> AppResult<Theme> {
     let theme = Theme::parse(raw).ok_or_else(|| AppError::InvalidInput(format!("unknown theme: {raw}")))?;
     repository::set(conn, "theme", theme.as_str())?;
     Ok(theme)
+}
+
+pub fn locale(conn: &Connection) -> AppResult<LocalePref> {
+    Ok(repository::get(conn, "locale")?.as_deref().and_then(LocalePref::parse).unwrap_or(LocalePref::System))
+}
+
+pub fn set_locale(conn: &Connection, raw: &str) -> AppResult<LocalePref> {
+    let locale = LocalePref::parse(raw).ok_or_else(|| AppError::InvalidInput(format!("unknown locale: {raw}")))?;
+    repository::set(conn, "locale", locale.as_str())?;
+    Ok(locale)
+}
+
+/// Whether the periodic update check runs. A missing row means on.
+pub fn auto_update(conn: &Connection) -> AppResult<bool> {
+    Ok(repository::get(conn, "auto_update")?.is_none_or(|v| v != "false"))
+}
+
+pub fn set_auto_update(conn: &Connection, enabled: bool) -> AppResult<bool> {
+    repository::set(conn, "auto_update", if enabled { "true" } else { "false" })?;
+    Ok(enabled)
 }
 
 #[cfg(test)]
@@ -50,6 +70,42 @@ mod tests {
         let conn = db::open_in_memory().unwrap();
         assert!(matches!(set_theme(&conn, "blue"), Err(AppError::InvalidInput(_))));
         assert_eq!(repository::get(&conn, "theme").unwrap().as_deref(), Some("system"));
+    }
+
+    #[test]
+    fn locale_defaults_to_system() {
+        let conn = db::open_in_memory().unwrap();
+        assert_eq!(locale(&conn).unwrap(), LocalePref::System);
+    }
+
+    #[test]
+    fn locale_falls_back_to_system_for_unknown_value() {
+        let conn = db::open_in_memory().unwrap();
+        repository::set(&conn, "locale", "fr").unwrap();
+        assert_eq!(locale(&conn).unwrap(), LocalePref::System);
+    }
+
+    #[test]
+    fn set_locale_rejects_unknown_value() {
+        let conn = db::open_in_memory().unwrap();
+        assert!(matches!(set_locale(&conn, "fr"), Err(AppError::InvalidInput(_))));
+        assert_eq!(set_locale(&conn, "ko").unwrap(), LocalePref::Ko);
+        assert_eq!(locale(&conn).unwrap(), LocalePref::Ko);
+    }
+
+    #[test]
+    fn auto_update_defaults_to_true() {
+        let conn = db::open_in_memory().unwrap();
+        assert!(auto_update(&conn).unwrap());
+    }
+
+    #[test]
+    fn set_auto_update_round_trips() {
+        let conn = db::open_in_memory().unwrap();
+        assert!(!set_auto_update(&conn, false).unwrap());
+        assert!(!auto_update(&conn).unwrap());
+        set_auto_update(&conn, true).unwrap();
+        assert!(auto_update(&conn).unwrap());
     }
 
     #[test]

@@ -3,7 +3,10 @@
   themes: false;
 }
 
-/* Tokens from docs/design/kraken-design.md. Colors live here only. */
+/*
+ * Colors live here only. Palette and metrics follow vee-app (the reference UI);
+ * brand purple from docs/design/kraken-design.md.
+ */
 @plugin 'daisyui/theme' {
   name: 'light';
   default: true;
@@ -11,7 +14,7 @@
   color-scheme: light;
 
   --color-base-100: #ffffff;
-  --color-base-200: #f5f5f8;
+  --color-base-200: #f7f7fa;
   --color-base-300: #dedee5;
   --color-base-content: #101114;
   --color-primary: #7132f5;
@@ -28,16 +31,16 @@
   --color-success-content: #ffffff;
   --color-warning: #f59e0b;
   --color-warning-content: #101114;
-  --color-error: #e5484d;
+  --color-error: #d1344b;
   --color-error-content: #ffffff;
 
-  --radius-selector: 1rem;
+  --radius-selector: 0.625rem;
   --radius-field: 0.75rem;
-  --radius-box: 1rem;
+  --radius-box: 0.75rem;
   --size-selector: 0.25rem;
   --size-field: 0.25rem;
   --border: 1px;
-  --depth: 1;
+  --depth: 0;
   --noise: 0;
 }
 
@@ -47,37 +50,79 @@
   prefersdark: true;
   color-scheme: dark;
 
-  --color-base-100: #101114;
-  --color-base-200: #1a1b20;
-  --color-base-300: #2a2c35;
-  --color-base-content: #f4f4f7;
-  --color-primary: #8b5cf6;
+  --color-base-100: #16171c;
+  --color-base-200: #1f2027;
+  --color-base-300: #2e2f39;
+  --color-base-content: #ececf1;
+  --color-primary: #9b7bff;
   --color-primary-content: #ffffff;
   --color-secondary: #7c6cf0;
   --color-secondary-content: #ffffff;
   --color-accent: #a78bfa;
   --color-accent-content: #101114;
-  --color-neutral: #9497a9;
+  --color-neutral: #8a8da0;
   --color-neutral-content: #101114;
   --color-info: #60a5fa;
   --color-info-content: #101114;
-  --color-success: #22c27e;
+  --color-success: #5fd39c;
   --color-success-content: #101114;
   --color-warning: #fbbf24;
   --color-warning-content: #101114;
-  --color-error: #f87171;
+  --color-error: #ff6b81;
   --color-error-content: #101114;
 
-  --radius-selector: 1rem;
+  --radius-selector: 0.625rem;
   --radius-field: 0.75rem;
-  --radius-box: 1rem;
+  --radius-box: 0.75rem;
   --size-selector: 0.25rem;
   --size-field: 0.25rem;
   --border: 1px;
-  --depth: 1;
+  --depth: 0;
   --noise: 0;
 }
 
-@theme {
-  --font-sans: 'IBM Plex Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+/* vee-app tokens daisyUI has no slot for. Use as bg-card, text-muted, border-divider, … */
+[data-theme='light'] {
+  --vee-card: #ffffff;
+  --vee-divider: #f0f0f4;
+  --vee-subtle: rgba(148, 151, 169, 0.08);
+  --vee-muted: #9497a9;
+  --vee-accent-subtle: rgba(133, 91, 251, 0.16);
+}
+
+[data-theme='dark'] {
+  --vee-card: #1f2027;
+  --vee-divider: #2a2b33;
+  --vee-subtle: rgba(148, 151, 169, 0.12);
+  --vee-muted: #8a8da0;
+  --vee-accent-subtle: rgba(133, 91, 251, 0.24);
+}
+
+@theme inline {
+  --font-sans: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --color-card: var(--vee-card);
+  --color-divider: var(--vee-divider);
+  --color-subtle: var(--vee-subtle);
+  --color-muted: var(--vee-muted);
+  --color-accent-subtle: var(--vee-accent-subtle);
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    font-size: 13px;
+    -webkit-font-smoothing: antialiased;
+    user-select: none;
+    @apply bg-base-100 text-base-content;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
 }

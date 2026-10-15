@@ -16,6 +16,7 @@ pub fn open(path: &Path) -> AppResult<Connection> {
     Ok(conn)
 }
 
+#[cfg(test)]
 pub fn open_in_memory() -> AppResult<Connection> {
     let mut conn = Connection::open_in_memory()?;
     migrate(&mut conn)?;
