@@ -13,7 +13,7 @@
 - 앱 구성, 빌드, 릴리스: `/Users/hwpark/Documents/rust-workspace/vee-app`. Tauri 2 + React 19 + Vite + TS 구성이며, 로컬에서 서명·공증해 릴리스하고 자동 업데이트를 지원한다.
 - 규칙 문서 형식과 버전 bump 워크플로: `/Users/hwpark/Documents/intellij-workspace/template-malgn-spring-modulith`. `AGENTS.md` Map과 `docs/agents/` 주제별 문서로 규칙을 나누고, `CLAUDE.md`는 `@AGENTS.md`를 불러온다. 버전 bump는 `.github/workflows/SmartVersionBumpOnPR.yml`과 `bump-version.sh`로 한다.
 
-작업 브랜치는 현재 브랜치 `master`다(아직 커밋이 없다).
+작업 브랜치는 현재 브랜치 `main`이다(`main`에서 이름을 바꿨다).
 
 ## 목표
 
@@ -51,7 +51,7 @@
 ### 릴리스: vee-app 방식 그대로, 로컬에서
 
 - `scripts/release.sh`: macOS Apple Silicon용으로 빌드·서명·공증하고 GitHub 초안 릴리스에 올린다.
-- `scripts/release.ps1`: Windows NSIS로 빌드해 같은 릴리스에 올린다.
+- `scripts/release.ps1`: Windows NSIS로 빌드해 같은 릴리스에 올린다. vee-app과 똑같이 Windows 코드 서명은 하지 않고, 업데이터용 Tauri 서명(`.sig`)만 만든다. 공증은 macOS만 한다.
 - `scripts/latest-json.mjs`(+ `latest-json.test.mjs`): 릴리스의 `.sig`를 모아 `latest.json`을 만들고 올린다.
 - 절차는 `docs/release.md`에 적는다.
 - 빌드와 릴리스용 CI는 없다.
@@ -148,10 +148,10 @@
   - `docs/agents/`는 spring 템플릿처럼 영어로 쓴다.
   - `CLAUDE.md`의 Claude 전용 규칙, `docs/development.md`, `docs/release.md`는 vee-app처럼 한국어로 쓴다.
 - **브랜치와 릴리스 흐름.**
-  - 브랜치는 spring 템플릿을 따른다: `master` / `develop` / `feature/*` / `hotfix/*`. 기본 PR base는 `develop`이다.
+  - 브랜치는 spring 템플릿을 따른다: `main` / `develop` / `feature/*` / `hotfix/*`. 기본 PR base는 `develop`이다.
   - 릴리스 절차:
-    1. `develop`을 `master`로 머지한다.
-    2. `master`에서 `scripts/release.sh`와 `scripts/release.ps1`을 실행한다.
+    1. `develop`을 `main`로 머지한다.
+    2. `main`에서 `scripts/release.sh`와 `scripts/release.ps1`을 실행한다.
     3. `latest-json.mjs`를 실행한다.
     4. 릴리스를 게시한다.
   - 태그는 `v<X.Y.Z>`다.
