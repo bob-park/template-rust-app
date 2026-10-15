@@ -21,7 +21,7 @@ related:
 ./bump-version-up.sh [patch|minor|major]   # default: patch
 ```
 
-- The script validates everything first, then writes. A malformed version or an unknown argument exits non-zero and changes nothing.
+- The script validates the version and the argument first. It writes all four files or none: after writing, it checks each file. If one wasn't updated (e.g. `CRATE_NAME` not renamed, so `Cargo.lock` had no match), it restores the backups and exits non-zero.
 - It uses `perl -i`, so it works on macOS and on the Ubuntu runner.
 - It is tested by `scripts/bump-version-up.test.mjs`.
 - No `-rcN`/date suffixes: the Tauri updater compares semver, and prerelease tags would break update ordering.

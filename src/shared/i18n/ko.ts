@@ -23,4 +23,12 @@ export const ko: Dict = {
     ready: (v: string) => `버전 ${v} 준비됨`,
     failed: '업데이트 확인 실패',
   },
+  errors: {
+    INVALID_INPUT: '허용되지 않는 값이에요.',
+    DB: '데이터베이스에 저장하지 못했어요.',
+    IO: '파일을 읽거나 쓰지 못했어요.',
+    SCHEMA_TOO_NEW: '더 새로운 버전의 앱이 만든 데이터예요. 앱을 업데이트해 주세요.',
+    UNKNOWN: '문제가 발생했어요.',
+    dismiss: '닫기',
+  },
 };

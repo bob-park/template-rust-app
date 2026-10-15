@@ -25,7 +25,7 @@ yarn install
 ```
 
 - `@bob-park/*` 패키지는 GitHub Packages에서 받는다(`.yarnrc.yml`의 `npmScopes`). 그래서 토큰이 없으면 `yarn install`이 실패한다. 셸 프로필에 `export`해 두면 편하다.
-- 이 레포의 yarn은 공개된 지 하루가 안 된 패키지를 설치하지 않는다(기본 `npmMinimalAgeGate`). 막 나온 버전을 추가할 때 "quarantined" 오류가 나면 한 단계 낮은 버전을 지정한다.
+- `.yarnrc.yml`은 `npmMinimalAgeGate: 0`(막 공개된 패키지도 설치)과 `enableScripts: true`(패키지 설치 스크립트 실행)로 설정되어 있다.
 
 ## 개발 실행
 

@@ -1,9 +1,13 @@
 //! Main window lifecycle: built after state is managed, hidden on close, reopened from Dock/tray.
 
+use crate::app::i18n;
 use tauri::{App, AppHandle, Emitter, Manager, Window, WindowEvent};
 
 pub const MAIN: &str = "main";
 pub const SETTINGS: &str = "settings";
+
+/// Tells the settings page to start over on its first tab.
+pub const SETTINGS_OPENED: &str = "settings://opened";
 
 /// Windows are `create: false` in tauri.conf.json so no webview can call a command
 /// before `AppState` is managed. Call this at the end of `setup`.
@@ -11,7 +15,15 @@ pub fn build_all(app: &App) -> tauri::Result<()> {
     for config in app.config().app.windows.clone() {
         tauri::WebviewWindowBuilder::from_config(app.handle(), &config)?.build()?;
     }
+    refresh_titles(app.handle());
     Ok(())
+}
+
+/// Native window titles follow the stored language. The main window keeps the product name.
+pub fn refresh_titles(app: &AppHandle) {
+    if let Some(window) = app.get_webview_window(SETTINGS) {
+        let _ = window.set_title(i18n::current(app).settings);
+    }
 }
 
 pub fn show_main(app: &AppHandle) {
@@ -20,7 +32,7 @@ pub fn show_main(app: &AppHandle) {
 
 pub fn show_settings(app: &AppHandle) {
     // Hidden, not destroyed, on close; tell the page to start over on the general tab.
-    let _ = app.emit_to(SETTINGS, "settings://opened", ());
+    let _ = app.emit_to(SETTINGS, SETTINGS_OPENED, ());
     show(app, SETTINGS);
 }
 

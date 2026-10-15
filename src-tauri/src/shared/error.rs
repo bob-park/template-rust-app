@@ -10,6 +10,9 @@ pub enum AppError {
     Db(#[from] rusqlite::Error),
     #[error("io error: {0}")]
     Io(#[from] std::io::Error),
+    /// The DB was written by a newer app version (e.g. an older build reinstalled over it).
+    #[error("database schema v{found} is newer than this app supports (v{supported})")]
+    SchemaTooNew { found: i64, supported: i64 },
 }
 
 impl AppError {
@@ -18,6 +21,7 @@ impl AppError {
             AppError::InvalidInput(_) => "INVALID_INPUT",
             AppError::Db(_) => "DB",
             AppError::Io(_) => "IO",
+            AppError::SchemaTooNew { .. } => "SCHEMA_TOO_NEW",
         }
     }
 }

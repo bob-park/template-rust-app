@@ -31,12 +31,12 @@ src/
 │   └── store/                # Zustand slice (slice.ts + <name>.state.ts), or .gitkeep
 ├── shared/
 │   ├── api/                  # call<T>() + AppError
-│   ├── components/           # cross-domain UI (settings/*, theme/*, i18n/*, queries/RQProvider)
+│   ├── components/           # cross-domain UI (settings/*, theme/*, i18n/*, error/ErrorAlert, queries/RQProvider)
 │   ├── hooks/                # reusable hooks (useSettingsShortcut)
 │   ├── i18n/                 # en.ts (base Dict), ko.ts, locale.ts
 │   ├── providers/            # ThemeProvider, I18nProvider
 │   ├── queries/              # QueryMutationHandle
-│   └── store/                # rootStore (combines slices), SlicePattern augmentation
+│   └── store/                # rootStore (combines slices), SlicePattern augmentation, error/ (cross-cutting error slice)
 └── utils/                    # pure functions only (no React, no I/O) + *.test.ts
 
 src-tauri/

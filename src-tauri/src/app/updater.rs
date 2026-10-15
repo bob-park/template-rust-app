@@ -10,6 +10,8 @@ use tauri_plugin_updater::{Update, UpdaterExt};
 
 const CHECK_EVERY: Duration = Duration::from_secs(6 * 60 * 60);
 
+pub const UPDATE_STATUS: &str = "update://status";
+
 #[derive(Clone, Debug, Default, PartialEq, Serialize)]
 #[serde(tag = "status", rename_all = "camelCase", rename_all_fields = "camelCase")]
 pub enum UpdateStatus {
@@ -42,7 +44,7 @@ fn now_ms() -> i64 {
 
 fn set_status(app: &AppHandle, status: UpdateStatus) {
     *app.state::<UpdateState>().status.lock().unwrap() = status.clone();
-    let _ = app.emit("update://status", status);
+    let _ = app.emit(UPDATE_STATUS, status);
     tray::refresh(app);
 }
 
@@ -52,9 +54,19 @@ async fn fetch(app: &AppHandle) -> tauri_plugin_updater::Result<Option<(Update, 
     Ok(Some((update, bytes)))
 }
 
+/// Claims the status for a new check under one lock. Returns the current status instead when a
+/// check is already running or an update is ready, so concurrent callers never download twice.
+fn begin_check(status: &Mutex<UpdateStatus>) -> Option<UpdateStatus> {
+    let mut status = status.lock().unwrap();
+    if matches!(*status, UpdateStatus::Ready { .. } | UpdateStatus::Checking) {
+        return Some(status.clone());
+    }
+    *status = UpdateStatus::Checking;
+    None
+}
+
 pub async fn check(app: &AppHandle) -> UpdateStatus {
-    let current = app.state::<UpdateState>().status.lock().unwrap().clone();
-    if matches!(current, UpdateStatus::Ready { .. } | UpdateStatus::Checking) {
+    if let Some(current) = begin_check(&app.state::<UpdateState>().status) {
         return current;
     }
     set_status(app, UpdateStatus::Checking);
@@ -116,6 +128,21 @@ pub fn install_update_and_restart(app: AppHandle) -> Result<(), String> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn begin_check_claims_the_status_once() {
+        let status = Mutex::new(UpdateStatus::Idle);
+        assert_eq!(begin_check(&status), None);
+        assert_eq!(*status.lock().unwrap(), UpdateStatus::Checking);
+        // A second caller (tray click while the periodic check runs) must not start another download.
+        assert_eq!(begin_check(&status), Some(UpdateStatus::Checking));
+    }
+
+    #[test]
+    fn begin_check_keeps_a_ready_update() {
+        let status = Mutex::new(UpdateStatus::Ready { version: "0.2.0".into() });
+        assert_eq!(begin_check(&status), Some(UpdateStatus::Ready { version: "0.2.0".into() }));
+    }
 
     #[test]
     fn status_serializes_like_the_typescript_union() {

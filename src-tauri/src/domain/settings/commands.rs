@@ -47,6 +47,7 @@ pub fn set_locale(app: AppHandle, state: State<AppState>, locale: String) -> App
     let locale = super::set_locale(&state.db.lock().unwrap(), &locale)?;
     crate::app::tray::refresh(&app);
     crate::app::menu::refresh(&app);
+    crate::app::window::refresh_titles(&app);
     let _ = app.emit(LOCALE_CHANGED, locale);
     Ok(locale)
 }

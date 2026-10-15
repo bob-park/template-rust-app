@@ -89,6 +89,7 @@ mod tests {
     fn set_locale_rejects_unknown_value() {
         let conn = db::open_in_memory().unwrap();
         assert!(matches!(set_locale(&conn, "fr"), Err(AppError::InvalidInput(_))));
+        assert_eq!(repository::get(&conn, "locale").unwrap(), None);
         assert_eq!(set_locale(&conn, "ko").unwrap(), LocalePref::Ko);
         assert_eq!(locale(&conn).unwrap(), LocalePref::Ko);
     }

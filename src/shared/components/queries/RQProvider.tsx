@@ -1,8 +1,15 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { MutationCache, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+
+import type { AppError } from '@/shared/api/common.dto';
+import { useStore } from '@/shared/store/rootStore';
 
 // One client per window: each Tauri window is its own JS context.
 export const queryClient = new QueryClient({
+  // Every failed mutation (a setting that didn't save, …) is shown by ErrorAlert.
+  mutationCache: new MutationCache({
+    onError: (error) => useStore.getState().showError(error as unknown as AppError),
+  }),
   defaultOptions: {
     queries: {
       refetchOnWindowFocus: false,

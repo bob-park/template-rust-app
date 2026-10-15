@@ -30,4 +30,4 @@ related:
 Notes:
 
 - TypeScript stays on 6.x: `typescript-eslint` (pulled in by the bobpark ESLint config) does not support TS 7 yet.
-- Yarn refuses packages published less than a day ago (age gate). On a "quarantined" error, pick the previous version.
+- `.yarnrc.yml` sets `npmMinimalAgeGate: 0` (no age gate) and `enableScripts: true` (dependency install scripts run).

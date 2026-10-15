@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import AutostartSwitch from '@/app/settings/_components/AutostartSwitch';
 import Tabs, { type SettingsTab } from '@/app/settings/_components/Tabs';
 import UpdateSection from '@/domain/updater/components/UpdateSection';
+import ErrorAlert from '@/shared/components/error/ErrorAlert';
 import LanguageSwitcher from '@/shared/components/i18n/LanguageSwitcher';
 import SettingRow from '@/shared/components/settings/SettingRow';
 import SettingSection from '@/shared/components/settings/SettingSection';
@@ -37,6 +38,7 @@ export default function SettingsApp() {
         role="tabpanel"
         aria-labelledby={`tab-${tab}`}
       >
+        <ErrorAlert />
         {tab === 'general' && (
           <SettingSection>
             <SettingRow label={t.settings.theme}>

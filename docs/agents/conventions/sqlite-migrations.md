@@ -25,6 +25,8 @@ related:
 
 3. `db::migrate` runs each pending file in its own transaction and then sets `user_version = index + 1`.
 
+If the DB's `user_version` is **higher** than `MIGRATIONS.len()` (an older build reinstalled over newer data), `migrate` returns `AppError::SchemaTooNew` and the app stops instead of running against an unknown schema.
+
 ## Rules
 
 - **Never edit, reorder, or delete a shipped file.** Installed apps have already recorded that version. To fix a mistake, add a new migration.

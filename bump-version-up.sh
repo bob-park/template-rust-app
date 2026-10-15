@@ -59,11 +59,29 @@ esac
 echo -e "${GREEN}새로운 버전: $new_version${NC}"
 
 export NEW_VERSION="$new_version" CRATE_NAME
+
+# Write all four or none: back up, write, verify, restore on any miss.
+backup=$(mktemp -d)
+trap 'rm -rf "$backup"' EXIT
+for f in "$TAURI_CONF" "$PACKAGE_JSON" "$CARGO_TOML" "$CARGO_LOCK"; do
+    mkdir -p "$backup/$(dirname "$f")" && cp "$f" "$backup/$f"
+done
+restore() {
+    for f in "$TAURI_CONF" "$PACKAGE_JSON" "$CARGO_TOML" "$CARGO_LOCK"; do cp "$backup/$f" "$f"; done
+    echo -e "${RED}Error: $1 — 변경을 되돌렸습니다.${NC}"
+    exit 1
+}
 # First top-level "version" only: dependency entries never use that key.
 perl -i -pe 'if (!$done && s/^(\s*"version":\s*)"[^"]*"/$1"$ENV{NEW_VERSION}"/) { $done = 1 } $done = 0 if eof' "$TAURI_CONF" "$PACKAGE_JSON"
 # [package] comes first in Cargo.toml; dependency tables use inline `version =` after a name.
 perl -i -pe 'if (!$done && s/^version = "[^"]*"/version = "$ENV{NEW_VERSION}"/) { $done = 1 }' "$CARGO_TOML"
 perl -0 -i -pe 's/(name = "\Q$ENV{CRATE_NAME}\E"\nversion = )"[^"]*"/$1"$ENV{NEW_VERSION}"/' "$CARGO_LOCK"
+
+grep -q "\"version\": \"$new_version\"" "$TAURI_CONF" || restore "$TAURI_CONF 의 버전을 바꾸지 못했습니다"
+grep -q "\"version\": \"$new_version\"" "$PACKAGE_JSON" || restore "$PACKAGE_JSON 의 버전을 바꾸지 못했습니다"
+grep -q "^version = \"$new_version\"" "$CARGO_TOML" || restore "$CARGO_TOML 의 버전을 바꾸지 못했습니다"
+perl -0ne 'exit(!/name = "\Q$ENV{CRATE_NAME}\E"\nversion = "\Q$ENV{NEW_VERSION}\E"/)' "$CARGO_LOCK" \
+    || restore "$CARGO_LOCK 에서 패키지 \"$CRATE_NAME\" 를 찾지 못했습니다 (CRATE_NAME 이 Cargo.toml 의 name 과 같은지 확인)"
 
 echo -e "${GREEN}✅ 버전이 성공적으로 업데이트되었습니다!${NC}"
 echo -e "${YELLOW}$current_version → $new_version${NC}"

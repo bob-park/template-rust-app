@@ -47,10 +47,10 @@ export async function setTheme(theme: ThemePref) {
 
 | Event | Payload | Emitted by | Consumed by |
 | ----- | ------- | ---------- | ----------- |
-| `settings://theme-changed` | `ThemePref` | `set_theme` | `ThemeProvider` (every window) |
-| `settings://locale-changed` | `LocalePref` | `set_locale` | `I18nProvider` (every window) |
-| `settings://opened` | — | `window::show_settings` | `SettingsApp` (reset to first tab) |
-| `update://status` | `UpdateStatus` | `updater::set_status` | `useUpdateStatus` |
+| `settings://theme-changed` (`THEME_CHANGED`) | `ThemePref` | `set_theme` | `ThemeProvider` (every window) |
+| `settings://locale-changed` (`LOCALE_CHANGED`) | `LocalePref` | `set_locale` | `I18nProvider` (every window) |
+| `settings://opened` (`SETTINGS_OPENED`) | — | `window::show_settings` | `SettingsApp` (reset to first tab) |
+| `update://status` (`UPDATE_STATUS`) | `UpdateStatus` | `updater::set_status` | `useUpdateStatus` |
 
 - Name events `<domain>://<event>` in kebab-case and export the name as a `const` in Rust.
 - Emit an event whenever a change made in one window must reach others. Each window has its own cache ([react-query](../libs/react-query.md#multiple-windows)).
