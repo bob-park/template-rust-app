@@ -678,3 +678,18 @@ docs/agents/ (see Task 8)
   - tray Open/Quit
   - Dock icon + reopen
 - [ ] **Step 3: Run** `git status`. Expected: clean, with no secrets or build output tracked (`git ls-files | grep -E 'target/|node_modules|dist/|\.env'` → empty).
+
+---
+
+## Addendum (user request mid-execution): Settings window + Cmd+,
+
+Folded into existing tasks:
+- **Task 2:** `commands::set_theme` takes `app: AppHandle` and, on success, calls `app.emit("settings://theme-changed", theme)`. The command test stays at the domain level.
+- **Task 3:**
+  - New screen `src/app/settings/SettingsApp.tsx` with `<ThemeSwitcher/>`. `App.tsx` keeps only `<Greeting/>`.
+  - `main.tsx` picks the screen from `getCurrentWindow().label`.
+  - `ThemeProvider` listens to `settings://theme-changed` and calls `queryClient.setQueryData(['settings','theme'], t)`.
+- **Task 4:**
+  - Add the `settings` window to tauri.conf (`create: false`, 480×360, `resizable: false`, `center`) and capabilities. `window.rs` gets `pub const SETTINGS`, `show_settings(app)`, and close→hide for both windows.
+  - App menu (`app/menu.rs`, `pub fn build(app) -> tauri::Result<Menu<Wry>>`): the default menu plus a "Settings…" item, accelerator `CmdOrCtrl+,`, id `settings`. Set it with `.menu(app::menu::build)`. `.on_menu_event` routes `settings` to `show_settings`.
+  - Tray gets a "Settings" item (id `settings`).

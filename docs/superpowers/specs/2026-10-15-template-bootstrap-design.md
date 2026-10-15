@@ -259,3 +259,14 @@ src-tauri/src/
 - `yarn tauri build --no-bundle`이 성공한다.
 - `./bump-version-up.sh patch|minor|major`가 세 파일을 같은 값으로 올린다. 형식이 잘못된 버전이나 알 수 없는 인자는 오류로 끝난다.
 - `AGENTS.md`의 모든 링크가 실제 파일을 가리킨다.
+
+## 추가 요구 (2026-10-15, 구현 중 사용자 요청)
+
+- **설정 화면을 추가하고, 기본 단축키는 `Cmd+,`다.** 위 비목표의 "별도 설정 창"을 대체한다.
+- 내가 정한 것:
+  - 별도 창(label `settings`, `create: false`, 480×360)으로 만들고, 닫으면 숨긴다.
+  - **단축키:** 앱 메뉴에 "Settings…"(`CmdOrCtrl+,`)를 둔다. macOS 관례에 맞춰 앱이 포커스일 때만 동작하고, 전역 단축키는 쓰지 않는다.
+  - **열 수 있는 다른 경로:** 트레이 메뉴에도 "Settings"를 둔다.
+  - **테마 선택기 위치:** 설정 창으로 옮긴다. 메인 창에는 Hello만 남는다.
+  - **창 간 테마 동기화:** `set_theme` 성공 시 Rust가 `settings://theme-changed`(payload: Theme)를 모든 창에 emit한다. 각 창의 프론트는 이를 받아 React Query 캐시를 갱신한다. 창마다 상태가 따로이기 때문이다.
+  - **창 분기:** `main.tsx`에서 `getCurrentWindow().label`로 화면을 나눈다. `main`이면 `src/app/App.tsx`, `settings`면 `src/app/settings/SettingsApp.tsx`를 띄운다.
