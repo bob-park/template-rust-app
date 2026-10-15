@@ -13,7 +13,7 @@
 - 앱 구성, 빌드, 릴리스: `/Users/hwpark/Documents/rust-workspace/vee-app`. Tauri 2 + React 19 + Vite + TS 구성이며, 로컬에서 서명·공증해 릴리스하고 자동 업데이트를 지원한다.
 - 규칙 문서 형식과 버전 bump 워크플로: `/Users/hwpark/Documents/intellij-workspace/template-malgn-spring-modulith`. `AGENTS.md` Map과 `docs/agents/` 주제별 문서로 규칙을 나누고, `CLAUDE.md`는 `@AGENTS.md`를 불러온다. 버전 bump는 `.github/workflows/SmartVersionBumpOnPR.yml`과 `bump-version.sh`로 한다.
 
-작업 브랜치는 현재 브랜치 `main`이다(`main`에서 이름을 바꿨다).
+작업 브랜치는 현재 브랜치 `main`이다(`master`에서 이름을 바꿨다).
 
 ## 목표
 
@@ -150,7 +150,7 @@
 - **브랜치와 릴리스 흐름.**
   - 브랜치는 spring 템플릿을 따른다: `main` / `develop` / `feature/*` / `hotfix/*`. 기본 PR base는 `develop`이다.
   - 릴리스 절차:
-    1. `develop`을 `main`로 머지한다.
+    1. `develop`을 `main`으로 머지한다.
     2. `main`에서 `scripts/release.sh`와 `scripts/release.ps1`을 실행한다.
     3. `latest-json.mjs`를 실행한다.
     4. 릴리스를 게시한다.
