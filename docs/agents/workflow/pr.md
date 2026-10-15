@@ -24,7 +24,7 @@ related:
 
 A short, imperative summary. **Do not** prefix it with `feat:`/`fix:` — those belong on commits.
 
-Merging into `develop` runs `.github/workflows/bump-version.yml`:
+Merging into `develop` (or a `hotfix/*` PR into `main`) runs `.github/workflows/bump-version.yml`:
 
 | PR title contains / label | Bump |
 | ------------------------- | ---- |

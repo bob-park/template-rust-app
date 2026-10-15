@@ -1,11 +1,18 @@
 name: Bump Version on Merge
 
-# Every merge into develop bumps the app version. The PR title (or label) picks the size:
+# Every merge into develop bumps the app version; on main only hotfix/* merges do (a release
+# promotion from develop is already bumped). The PR title (or label) picks the size:
 #   [major] / label major → major, [minor] / label minor → minor, anything else → patch.
 on:
   push:
     branches:
       - develop
+      - main
+
+# Merges that land close together bump one after another, each on top of the previous bump.
+concurrency:
+  group: bump-version-${{ github.ref_name }}
+  cancel-in-progress: false
 
 permissions:
   contents: write
@@ -22,6 +29,8 @@ jobs:
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          # Branch head, not the triggering SHA: includes a bump pushed by a run queued before us.
+          ref: ${{ github.ref_name }}
           fetch-depth: 0
 
       - name: Configure git
@@ -31,8 +40,10 @@ jobs:
 
       - name: Get merged PR number
         id: merged-pr
+        env:
+          HEAD_COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
         run: |
-          MSG=$(git log -1 --pretty=%s)
+          MSG=$(printf '%s\n' "$HEAD_COMMIT_MESSAGE" | head -n 1)
           echo "Head commit: $MSG"
           # Merge commit: "Merge pull request #123 from ..."; squash merge: "Title (#123)"
           if [[ "$MSG" =~ Merge\ pull\ request\ \#([0-9]+) ]] || [[ "$MSG" =~ \(\#([0-9]+)\)$ ]]; then
@@ -58,13 +69,31 @@ jobs:
               });
               core.setOutput('title', pr.title);
               core.setOutput('labels', pr.labels.map((label) => label.name).join(' '));
+              core.setOutput('head', pr.head.ref);
             } catch (error) {
               console.log('Error fetching PR details:', error);
               core.setOutput('title', '');
               core.setOutput('labels', '');
+              core.setOutput('head', '');
             }
 
+      - name: Decide whether to bump
+        id: should-bump
+        env:
+          BRANCH: ${{ github.ref_name }}
+          PR_HEAD: ${{ steps.pr-details.outputs.head }}
+        run: |
+          # main: only hotfix/* merges bump (develop→main promotion is already bumped).
+          # develop: everything except the main→develop back-merge of a hotfix.
+          if [[ "$BRANCH" == "main" && "$PR_HEAD" != hotfix/* ]] || [[ "$BRANCH" == "develop" && "$PR_HEAD" == "main" ]]; then
+            echo "bump=false" >> "$GITHUB_OUTPUT"
+            echo "Skipping bump (branch=$BRANCH, PR head=$PR_HEAD)"
+          else
+            echo "bump=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Determine version bump type
+        if: steps.should-bump.outputs.bump == 'true'
         id: bump-type
         env:
           PR_TITLE: ${{ steps.pr-details.outputs.title }}
@@ -81,9 +110,13 @@ jobs:
           fi
 
       - name: Run bump-version-up script
+        if: steps.should-bump.outputs.bump == 'true'
         run: bash ./bump-version-up.sh ${{ steps.bump-type.outputs.type }}
 
       - name: Commit version bump
+        if: steps.should-bump.outputs.bump == 'true'
+        env:
+          BRANCH: ${{ github.ref_name }}
         run: |
           if [ -z "$(git status --porcelain)" ]; then
             echo "Nothing to commit"
@@ -92,4 +125,4 @@ jobs:
           NEW_VERSION=$(node -p 'require("./src-tauri/tauri.conf.json").version')
           git add src-tauri/tauri.conf.json package.json src-tauri/Cargo.toml src-tauri/Cargo.lock
           git commit -m "chore: bump version to ${NEW_VERSION} [skip ci]"
-          git push origin develop
+          git push origin "$BRANCH"

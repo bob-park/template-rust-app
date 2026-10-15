@@ -17,7 +17,7 @@ related:
 | `main` | Production-ready code. Releases are built and tagged from here (see [release](release.md)). |
 | `develop` | Integration branch for the next release. Every merge bumps the version ([versioning](versioning.md)). |
 | `feature/<topic>` | Feature work. Branch from `develop`, PR back to `develop`. |
-| `hotfix/<topic>` | Urgent fix to a release. Branch from `main`, PR to `main`, then merge back into `develop`. |
+| `hotfix/<topic>` | Urgent fix to a release. Branch from `main`, PR to `main` (the merge bumps the patch version), release, then merge `main` back into `develop`. |
 
 Rules:
 

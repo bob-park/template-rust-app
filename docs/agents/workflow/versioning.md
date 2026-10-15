@@ -9,7 +9,7 @@ related:
 
 # Versioning
 
-> Plain semver `X.Y.Z`, starting at `0.0.1`. `src-tauri/tauri.conf.json` is the source of truth. `bump-version-up.sh` keeps four files in sync; **never edit versions by hand**. The bump runs automatically in GitHub Actions on every merge into `develop`.
+> Plain semver `X.Y.Z`, starting at `0.0.1`. `src-tauri/tauri.conf.json` is the source of truth. `bump-version-up.sh` keeps four files in sync; **never edit versions by hand**. GitHub Actions runs the bump on every merge into `develop`, and on `hotfix/*` merges into `main`.
 
 ## Files carrying the version
 
@@ -28,9 +28,19 @@ related:
 
 ## Workflow (`.github/workflows/bump-version.yml`)
 
-1. Trigger: a push to `develop`, which happens when a PR merges. The bot's own commit carries `[skip ci]` and is skipped.
-2. The workflow finds the PR number from the merge or squash commit, then reads the PR title and labels ([pr](pr.md#title)).
-3. It runs the script and commits `chore: bump version to X.Y.Z [skip ci]` to `develop`.
+1. **Trigger:** a push to `develop` or `main`, which happens when a PR merges. The bot's own commit carries `[skip ci]` and is skipped.
+2. **Reading the PR:** the workflow finds the PR number from the merge or squash commit, then reads the PR title, labels and head branch ([pr](pr.md#title)).
+3. **Which merges bump:**
+
+   | Merged into | PR head | Bump? |
+   | ----------- | ------- | ----- |
+   | `develop` | any feature/day-to-day branch | yes |
+   | `develop` | `main` (hotfix back-merge) | no — the hotfix was already bumped on `main` |
+   | `main` | `hotfix/*` | yes — so the hotfix ships as a new version |
+   | `main` | `develop` (release promotion) | no — already bumped on `develop` |
+
+4. **Commit:** it runs the script and commits `chore: bump version to X.Y.Z [skip ci]` to the same branch.
+5. **Close merges:** runs are serialized per branch (`concurrency`). Each run checks out the branch head, so a merge that lands right after another bumps on top of it instead of being rejected.
 
 **Repository setup:**
 

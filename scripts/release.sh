@@ -14,10 +14,20 @@ REPO="bob-park/template-rust-app"
 VERSION=$(node -p 'require("./src-tauri/tauri.conf.json").version')
 TAG="v$VERSION"
 
+# A published release that already has this platform's build is shipped: overwriting it would
+# change what users installed without a version bump. (Adding a missing platform is fine.)
+shipped=$(gh release view "$TAG" -R "$REPO" --json isDraft,assets \
+  -q 'select(.isDraft == false) | .assets[].name | select(endswith("_aarch64.app.tar.gz"))' 2>/dev/null || true)
+if [ -n "$shipped" ]; then
+  echo "$TAG is already published with a macOS build ($shipped). Bump the version first (docs/release.md)." >&2
+  exit 1
+fi
+
 yarn tauri build --target aarch64-apple-darwin
 
+# --target main: the tag is cut from main, not the repo's default branch (often develop).
 gh release view "$TAG" -R "$REPO" >/dev/null 2>&1 \
-  || gh release create "$TAG" -R "$REPO" --draft --title "App $TAG" --notes "App $TAG"
+  || gh release create "$TAG" -R "$REPO" --target main --draft --title "App $TAG" --notes "App $TAG"
 
 bundle="src-tauri/target/aarch64-apple-darwin/release/bundle"
 # Exact names: old versions' bundles stay in target/ after a version bump.

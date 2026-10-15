@@ -12,6 +12,11 @@ $repo = "bob-park/template-rust-app"
 $version = (Get-Content src-tauri/tauri.conf.json -Raw | ConvertFrom-Json).version
 $tag = "v$version"
 
+# A published release that already has this platform's build is shipped: overwriting it would
+# change what users installed without a version bump. (Adding a missing platform is fine.)
+$shipped = gh release view $tag -R $repo --json isDraft,assets -q 'select(.isDraft == false) | .assets[].name | select(endswith("_x64-setup.exe"))' 2> $null
+if ($shipped) { throw "$tag is already published with a Windows build ($shipped). Bump the version first (docs/release.md)." }
+
 yarn tauri build
 if ($LASTEXITCODE) { throw "tauri build failed" }
 
@@ -21,7 +26,8 @@ $sig = Get-Item "$($setup.FullName).sig"
 
 gh release view $tag -R $repo *> $null
 if ($LASTEXITCODE) {
-  gh release create $tag -R $repo --draft --title "App $tag" --notes "App $tag"
+  # --target main: the tag is cut from main, not the repo's default branch (often develop).
+  gh release create $tag -R $repo --target main --draft --title "App $tag" --notes "App $tag"
   if ($LASTEXITCODE) { throw "could not create release $tag" }
 }
 gh release upload $tag -R $repo --clobber $setup.FullName $sig.FullName

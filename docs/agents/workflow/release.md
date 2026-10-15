@@ -22,6 +22,8 @@ related:
 ## Rules for agents
 
 - **Never run the release scripts or `gh release` commands without the user's explicit request.** They publish to users.
-- If you change `productName`, update the file names in all three scripts.
+- If you change `productName`, update the file names in `release.sh` and `release.ps1`. `latest-json.mjs` matches on suffix only.
+- Both scripts refuse to run when `v<v>` is already **published** with that platform's build. A shipped version is never overwritten; bump the version instead (hotfix flow in [versioning](versioning.md)). Adding a platform that is still missing from a published release is allowed.
+- Releases are created with `--target main`, so the tag points at `main` even when `develop` is the repo's default branch.
 - `latest-json.mjs` refuses to run while `plugins.updater.pubkey` is empty. Don't remove that guard.
 - The updater only accepts a `latest.json` whose listed platforms are all complete. That's why the script includes only the platforms that were uploaded.

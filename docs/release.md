@@ -51,8 +51,8 @@ yarn은 반드시 4.18.1(`.mise.toml`)로 실행한다. mise가 활성화되지 
 
 ## 절차
 
-1. **버전은 손으로 올리지 않는다.** `develop`에 PR이 머지되면 GitHub Actions가 `bump-version-up.sh`로 올린다. 버전이 들어가는 곳은 `tauri.conf.json`, `package.json`, `Cargo.toml`, `Cargo.lock`이다.
-2. `develop`을 `main`으로 머지하는 릴리스 PR을 만들고 머지한다. 이후 단계는 모두 `main`에서 한다.
+1. **버전은 손으로 올리지 않는다.** `develop`에 PR이 머지되면 GitHub Actions가 `bump-version-up.sh`로 올린다. `main`에 `hotfix/*` PR이 머지될 때도 올린다. 버전이 들어가는 곳은 `tauri.conf.json`, `package.json`, `Cargo.toml`, `Cargo.lock`이다.
+2. `develop`을 `main`으로 머지하는 릴리스 PR을 만들고 머지한다. 이후 단계는 모두 `main`에서 한다. 릴리스 태그는 `--target main`으로 만들어져 항상 `main`을 가리킨다.
 3. macOS에서 `scripts/release.sh`를 실행한다. 빌드·서명·공증을 한 뒤 초안 릴리스 `v<버전>`에 다음 파일을 올린다.
    - `App_<버전>_aarch64.dmg`
    - `App_<버전>_aarch64.app.tar.gz`와 그 `.sig`
@@ -83,6 +83,15 @@ Windows 빌드를 바로 할 수 없을 때는 macOS만 먼저 내보내고, Win
 
 1. Windows PC에서 `pwsh scripts/release.ps1`을 실행한다. 이미 게시된 같은 릴리스에 올라가고, 새 초안은 만들지 않는다.
 2. 아무 기계에서 `node scripts/latest-json.mjs v<버전>`을 다시 실행해 `latest.json`을 덮어쓴다. 출력에 두 플랫폼이 모두 있는지 확인한다. 이미 게시된 상태이므로 `--draft=false`는 다시 할 필요 없다.
+
+## 핫픽스
+
+1. `main`에서 `hotfix/<주제>` 브랜치를 만든다.
+2. `main`으로 PR을 보내고 머지한다. 머지되면 Actions가 patch 버전을 올린다.
+3. 위 절차의 3번부터 진행한다.
+4. 릴리스 후 `main`을 `develop`에 머지한다. 이 머지는 버전을 다시 올리지 않는다.
+
+릴리스 스크립트는 **이미 게시된** `v<버전>`에 같은 플랫폼 빌드가 있으면 실행을 거부한다. 게시된 버전을 덮어쓰면 설치된 앱이 업데이트를 감지하지 못하기 때문이다. 버전을 올린 뒤 다시 릴리스한다.
 
 ## 문제 해결
 
