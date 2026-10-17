@@ -9,6 +9,7 @@ Find the matching entry in the Map or in "How to use", open that doc, and check 
 ## Always
 
 - **Design/UI work:** before building or changing any UI (screens, components, styles, tokens), read [`docs/design/`](docs/design/) and [design](docs/agents/design.md) first.
+- **UI mockups:** for any design or UI work, show at least 3 mockup options in the `superpowers` visual companion before implementing. Always use the `ui-ux-pro-max` skill to create them.
 - **Node/Yarn versions:** use the versions pinned in [`.mise.toml`](.mise.toml) (Node 26, Yarn 4.18.1). Run `mise install` once, then run every `node`/`yarn` command through mise (activated shell or `mise exec --`). Don't use a global Node or Yarn 1; it rewrites `yarn.lock`.
 
 ## Map
