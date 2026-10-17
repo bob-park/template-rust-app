@@ -6,7 +6,10 @@ Each topic doc opens with YAML frontmatter (`title`, `scope`, `applies_to`, `rel
 
 Find the matching entry in the Map or in "How to use", open that doc, and check its TL;DR. If nothing matches, start with [overview](docs/agents/overview.md) and [architecture](docs/agents/architecture.md).
 
-**App design: read [`docs/design/`](docs/design/) before building or changing any UI.**
+## Always
+
+- **Design/UI work:** before building or changing any UI (screens, components, styles, tokens), read [`docs/design/`](docs/design/) and [design](docs/agents/design.md) first.
+- **Node/Yarn versions:** use the versions pinned in [`.mise.toml`](.mise.toml) (Node 26, Yarn 4.18.1). Run `mise install` once, then run every `node`/`yarn` command through mise (activated shell or `mise exec --`). Don't use a global Node or Yarn 1; it rewrites `yarn.lock`.
 
 ## Map
 
