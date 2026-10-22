@@ -1,4 +1,5 @@
 //! Checks GitHub Releases, downloads in the background, installs only when asked from the tray.
+//! A ready update keeps being re-checked so a restart always installs the newest release.
 
 use crate::app::{state::AppState, tray};
 use crate::domain::settings;
@@ -27,6 +28,8 @@ pub enum UpdateStatus {
 pub struct UpdateState {
     status: Mutex<UpdateStatus>,
     pending: Mutex<Option<(Update, Vec<u8>)>>,
+    /// Serializes downloads so the periodic check and a restart never fetch the same bundle twice.
+    download: tauri::async_runtime::Mutex<()>,
 }
 
 impl UpdateState {
@@ -48,14 +51,40 @@ fn set_status(app: &AppHandle, status: UpdateStatus) {
     tray::refresh(app);
 }
 
-async fn fetch(app: &AppHandle) -> tauri_plugin_updater::Result<Option<(Update, Vec<u8>)>> {
+/// A release replaces the pending bundle only when it is a different version.
+fn needs_download(pending: Option<&str>, latest: &str) -> bool {
+    pending != Some(latest)
+}
+
+/// Downloads the latest release into `pending` unless it is already there.
+/// Returns the pending version, or `None` when no release is newer than the running app.
+async fn fetch_latest(app: &AppHandle) -> tauri_plugin_updater::Result<Option<String>> {
+    let state = app.state::<UpdateState>();
+    let _guard = state.download.lock().await;
     let Some(update) = app.updater()?.check().await? else { return Ok(None) };
-    let bytes = update.download(|_, _| {}, || {}).await?;
-    Ok(Some((update, bytes)))
+    let pending = state.pending.lock().unwrap().as_ref().map(|(u, _)| u.version.clone());
+    if needs_download(pending.as_deref(), &update.version) {
+        let bytes = update.download(|_, _| {}, || {}).await?;
+        *state.pending.lock().unwrap() = Some((update, bytes));
+    }
+    Ok(state.pending.lock().unwrap().as_ref().map(|(u, _)| u.version.clone()))
+}
+
+/// Swaps a ready update for a newer release if one shipped since it was downloaded.
+/// Failures keep the ready update, so the user can still install it.
+async fn refresh_ready(app: &AppHandle) -> UpdateStatus {
+    match fetch_latest(app).await {
+        Ok(Some(version)) if app.state::<UpdateState>().ready_version().as_ref() != Some(&version) => {
+            set_status(app, UpdateStatus::Ready { version });
+        }
+        Ok(_) => {}
+        Err(e) => log::warn!("update refresh failed: {e}"),
+    }
+    app.state::<UpdateState>().status.lock().unwrap().clone()
 }
 
 /// Claims the status for a new check under one lock. Returns the current status instead when a
-/// check is already running or an update is ready, so concurrent callers never download twice.
+/// check is already running or an update is ready, so concurrent callers never check twice.
 fn begin_check(status: &Mutex<UpdateStatus>) -> Option<UpdateStatus> {
     let mut status = status.lock().unwrap();
     if matches!(*status, UpdateStatus::Ready { .. } | UpdateStatus::Checking) {
@@ -66,16 +95,14 @@ fn begin_check(status: &Mutex<UpdateStatus>) -> Option<UpdateStatus> {
 }
 
 pub async fn check(app: &AppHandle) -> UpdateStatus {
-    if let Some(current) = begin_check(&app.state::<UpdateState>().status) {
-        return current;
+    match begin_check(&app.state::<UpdateState>().status) {
+        Some(UpdateStatus::Ready { .. }) => return refresh_ready(app).await,
+        Some(current) => return current,
+        None => {}
     }
     set_status(app, UpdateStatus::Checking);
-    let status = match fetch(app).await {
-        Ok(Some((update, bytes))) => {
-            let version = update.version.clone();
-            *app.state::<UpdateState>().pending.lock().unwrap() = Some((update, bytes));
-            UpdateStatus::Ready { version }
-        }
+    let status = match fetch_latest(app).await {
+        Ok(Some(version)) => UpdateStatus::Ready { version },
         Ok(None) => UpdateStatus::UpToDate { checked_at: now_ms() },
         Err(e) => {
             log::warn!("update check failed: {e}");
@@ -86,7 +113,9 @@ pub async fn check(app: &AppHandle) -> UpdateStatus {
     status
 }
 
-pub fn install_and_restart(app: &AppHandle) -> Result<(), String> {
+pub async fn install_and_restart(app: &AppHandle) -> Result<(), String> {
+    // A release may have shipped since the download; install the newest so one restart is enough.
+    refresh_ready(app).await;
     // Borrow, don't take: a failed install keeps the download so the user can retry.
     let state = app.state::<UpdateState>();
     let pending = state.pending.lock().unwrap();
@@ -121,8 +150,8 @@ pub fn get_update_status(state: State<UpdateState>) -> UpdateStatus {
 }
 
 #[tauri::command]
-pub fn install_update_and_restart(app: AppHandle) -> Result<(), String> {
-    install_and_restart(&app)
+pub async fn install_update_and_restart(app: AppHandle) -> Result<(), String> {
+    install_and_restart(&app).await
 }
 
 #[cfg(test)]
@@ -142,6 +171,14 @@ mod tests {
     fn begin_check_keeps_a_ready_update() {
         let status = Mutex::new(UpdateStatus::Ready { version: "0.2.0".into() });
         assert_eq!(begin_check(&status), Some(UpdateStatus::Ready { version: "0.2.0".into() }));
+    }
+
+    #[test]
+    fn needs_download_only_for_a_different_version() {
+        assert!(needs_download(None, "0.2.0"));
+        // A newer release shipped after 0.2.0 was downloaded: replace it.
+        assert!(needs_download(Some("0.2.0"), "0.3.0"));
+        assert!(!needs_download(Some("0.3.0"), "0.3.0"));
     }
 
     #[test]

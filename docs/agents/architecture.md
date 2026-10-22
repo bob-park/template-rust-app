@@ -68,4 +68,5 @@ Closing any window **hides** it (`window::hide_on_close`); the app lives in the 
 
 - Release builds only: checks GitHub Releases `latest.json` at startup and every 6 h while `settings.auto_update` is on.
 - Downloads in the background; installs only when the user picks "Restart to Update" (tray or Settings → Updates).
+- A ready update is still re-checked (periodically and right before install); a newer release replaces the download, so one restart always lands on the latest version.
 - Status changes emit `update://status` and rebuild the tray menu.
