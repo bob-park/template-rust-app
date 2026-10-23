@@ -44,7 +44,7 @@ yarn tauri signer generate -w ~/.config/template-rust-app/updater.key
 
 ### Yarn 버전 주의
 
-yarn은 반드시 4.18.1(`.mise.toml`)로 실행한다. mise가 활성화되지 않아 전역 yarn 1.x가 잡히면 `yarn.lock`이 Yarn 1 형식으로 통째로 바뀐다.
+yarn은 반드시 4.18.1(`../mise.toml`)로 실행한다. mise가 활성화되지 않아 전역 yarn 1.x가 잡히면 `yarn.lock`이 Yarn 1 형식으로 통째로 바뀐다.
 
 - `yarn --version`으로 버전을 확인한다.
 - 4.x가 아니면 `corepack yarn@4.18.1 <명령>`으로 실행한다.
