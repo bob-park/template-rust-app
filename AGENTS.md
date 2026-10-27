@@ -49,7 +49,7 @@ Find the matching entry in the Map or in "How to use", open that doc, and check 
 - [Commit Messages](docs/agents/workflow/commit-messages.md): `<prefix>: <subject>`
 - [Pull Requests](docs/agents/workflow/pr.md): base branch, title → version bump
 - [Versioning](docs/agents/workflow/versioning.md): semver, `bump-version-up.sh`, the `develop` workflow
-- [Release](docs/agents/workflow/release.md): local signed release scripts per OS (`scripts/release-macos.sh`: Developer ID + App Store Connect API key notarization of `.app` and `.dmg`; `scripts/release-windows.ps1`), `latest.json`
+- [Release](docs/agents/workflow/release.md): local signed release scripts per OS (`scripts/release-macos.sh`: Developer ID + App Store Connect API key notarization of `.app` and `.dmg`, updater key from the keychain via `scripts/load-updater-key-macos.sh`; `scripts/release-windows.ps1`: updater key from Credential Manager via `scripts/load-updater-key-windows.ps1`), `latest.json`, [updater signing key](docs/agents/workflow/release.md#updater-signing-key) (`yarn tauri signer generate` / `sign`)
 
 ### Ops
 - [Build & Run](docs/agents/build-run.md): dev, `--no-bundle`, full build, signed macOS build (`scripts/release-macos.sh --build-only`), gotchas
@@ -73,7 +73,8 @@ Find the matching entry in the Map or in "How to use", open that doc, and check 
 - **Starting a branch:** [branching](docs/agents/workflow/branching.md)
 - **Writing a commit message:** [commit-messages](docs/agents/workflow/commit-messages.md)
 - **Opening a PR:** [pr](docs/agents/workflow/pr.md)
-- **Signed/notarized macOS build or Apple credentials:** [build-run](docs/agents/build-run.md) → [configuration](docs/agents/configuration.md#secrets) → [release](docs/agents/workflow/release.md)
+- **Signed/notarized macOS build, Apple credentials, or the updater signing key:** [build-run](docs/agents/build-run.md) → [configuration](docs/agents/configuration.md#secrets) → [release](docs/agents/workflow/release.md)
+- **Creating, rotating, or using the updater signing key (`yarn tauri signer`):** [release](docs/agents/workflow/release.md#updater-signing-key) → [configuration](docs/agents/configuration.md#secrets). Never rotate it without the user's request.
 - **Cutting a release:** [release](docs/agents/workflow/release.md) → [versioning](docs/agents/workflow/versioning.md)
 
 ## Convention Enforcement

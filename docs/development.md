@@ -67,8 +67,8 @@ scripts/release-macos.sh --build-only   # macOS: Developer ID 서명 + API 키�
 ```
 
 - 결과물은 `src-tauri/target/release/bundle/`에 생긴다. `release-macos.sh`는 `--target aarch64-apple-darwin`으로 빌드하므로 `src-tauri/target/aarch64-apple-darwin/release/bundle/`에 생긴다.
-- `createUpdaterArtifacts`가 켜져 있어서 번들 빌드에는 `TAURI_SIGNING_PRIVATE_KEY`가 필요하다.
-- `scripts/release-macos.sh`는 키체인의 API 키 ID·Issuer ID와 `~/.config/apple/`, `~/.config/template-rust-app/sign.env`를 읽는다. 준비 방법은 [릴리스 절차의 macOS 장비](release.md#macos-장비)를 본다.
+- `createUpdaterArtifacts`가 켜져 있어서 번들 빌드에는 `TAURI_SIGNING_PRIVATE_KEY`가 필요하다. 직접 빌드할 때는 먼저 `source scripts/load-updater-key-macos.sh`(macOS) 또는 `. scripts/load-updater-key-windows.ps1`(Windows)을 실행한다.
+- `scripts/release-macos.sh`는 키체인의 API 키 ID·Issuer ID·업데이터 서명 키(`scripts/load-updater-key-macos.sh`)와 `~/.config/apple/`을 읽는다. 준비 방법은 [릴리스 절차의 macOS 장비](release.md#macos-장비)를 본다.
 - 서명, 공증, GitHub 릴리스 업로드는 [릴리스 절차](release.md)를 따른다.
 
 ## 프로젝트 구조

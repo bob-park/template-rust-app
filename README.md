@@ -44,12 +44,12 @@ yarn tauri dev
 - [ ] `src-tauri/tauri.conf.json`:
   - `productName`, `identifier`, 창 `title`
   - `plugins.updater.endpoints`의 저장소 경로
-  - `plugins.updater.pubkey`: [릴리스 절차](docs/release.md#처음-한-번)에서 생성
+  - `plugins.updater.pubkey`: [릴리스 절차](docs/release.md#처음-한-번)에서 생성 (같은 내용을 `src-tauri/updater.key.pub`으로 커밋)
 - [ ] `scripts/release-macos.sh`, `scripts/release-windows.ps1`, `scripts/latest-json.mjs`:
   - `REPO`
-  - `~/.config/template-rust-app/sign.env` 경로
   - 번들 파일 이름의 `App_` / `App.app` 접두어 (productName과 같아야 한다)
   - 릴리스 제목 `App $TAG`
+- [ ] `scripts/load-updater-key-macos.sh`의 `APP_NAME`, `scripts/load-updater-key-windows.ps1`의 `$AppName` (키체인·자격 증명 관리자 항목 이름 `tauri-updater-<이름>`)
 - [ ] `bump-version-up.sh`: `CRATE_NAME` (Cargo.lock의 패키지 이름)
 - [ ] `index.html`: `<title>`
 - [ ] `src/shared/store/rootStore.ts`: zustand devtools의 `name`

@@ -11,15 +11,20 @@
 
 ### 업데이터 서명 키 (새 앱마다 한 번)
 
+먼저 `scripts/load-updater-key-macos.sh`의 `APP_NAME`과 `scripts/load-updater-key-windows.ps1`의 `$AppName`을 앱 이름으로 바꾼다. 아래 `<앱>`은 그 값이다.
+
 ```bash
-yarn tauri signer generate -w ~/.config/template-rust-app/updater.key
+yarn tauri signer generate -w <경로>   # 암호를 물어본다(-p로 지정, 이미 있으면 -f)
 ```
 
-1. 출력된 **공개키**를 `src-tauri/tauri.conf.json`의 `plugins.updater.pubkey`에 넣고 커밋한다.
+1. `<경로>.pub`(공개키)를 `src-tauri/updater.key.pub`으로 복사하고, 같은 내용을 `src-tauri/tauri.conf.json`의 `plugins.updater.pubkey`에 넣어 커밋한다.
    - 공개키가 비어 있으면 `latest-json.mjs`가 실행을 거부한다.
    - 이 값이 비어 있는 상태로 빌드된 앱은 업데이트를 검증하지 못한다.
-2. 개인키 파일과 비밀번호는 아래 `sign.env`에 둔다. **저장소에는 절대 넣지 않는다.**
-3. 개인키를 잃어버리면 이미 설치된 앱은 더 이상 업데이트를 받지 못한다. 안전한 곳에 백업한다.
+2. 개인키 **내용**과 비밀번호는 아래 "macOS 장비"·"Windows PC"대로 키체인과 자격 증명 관리자에 넣는다. **저장소에는 절대 넣지 않는다.**
+3. 개인키 파일은 오프라인 백업만 남기고 작업 기계에서 지운다. 개인키를 잃어버리면 이미 설치된 앱은 더 이상 업데이트를 받지 못한다.
+4. 키를 바꾸면 이미 설치된 앱은 새 키로 서명된 업데이트를 받지 못하고, 사용자가 직접 다시 설치해야 한다. 개인키를 잃어버렸을 때만 바꾼다.
+
+파일 하나를 손으로 다시 서명할 때: 키를 불러온 뒤(`source scripts/load-updater-key-macos.sh` / `. scripts/load-updater-key-windows.ps1`) `yarn tauri signer sign --app-version <버전> <파일>`. `yarn tauri build`가 업데이트 파일은 알아서 서명하므로 보통은 필요 없다.
 
 ### macOS 장비
 
@@ -41,21 +46,28 @@ yarn tauri signer generate -w ~/.config/template-rust-app/updater.key
   APPLE_SIGNING_IDENTITY="Developer ID Application: ..."
   ```
 
-- `~/.config/template-rust-app/sign.env` (앱마다):
+- 업데이터 서명 키 (앱마다): 개인키 내용과 암호를 로그인 키체인에 넣는다. `release-macos.sh`가 `scripts/load-updater-key-macos.sh`로 읽어 온다.
 
   ```bash
-  TAURI_SIGNING_PRIVATE_KEY="/Users/<me>/.config/template-rust-app/updater.key"   # 절대 경로 또는 키 내용
-  TAURI_SIGNING_PRIVATE_KEY_PASSWORD="..."
+  security add-generic-password -a "$USER" -s tauri-updater-<앱> -w '<개인키 내용>'
+  security add-generic-password -a "$USER" -s tauri-updater-<앱>-pw -w '<키 암호>'
   ```
 
-- `sign.env`에 예전 `APPLE_ID`/`APPLE_PASSWORD`/`APPLE_TEAM_ID`가 남아 있으면 지운다. `APPLE_ID`가 있으면 Tauri가 API 키 대신 그쪽으로 공증한다.
+  - 직접 `yarn tauri build`를 할 때는 먼저 `source scripts/load-updater-key-macos.sh`를 실행한다.
+- 환경에 예전 `APPLE_ID`/`APPLE_PASSWORD`/`APPLE_TEAM_ID`가 남아 있으면 지운다. `APPLE_ID`가 있으면 Tauri가 API 키 대신 그쪽으로 공증한다.
 - 서명·공증된 앱만 만들어 보려면 `scripts/release-macos.sh --build-only`를 실행한다(업로드 없음). Tauri는 `.app`만 공증하므로, 스크립트가 빌드 뒤 `.dmg`도 `notarytool`로 공증하고 스테이플한다.
 
 ### Windows PC
 
 - 필요한 도구: Rust, Node 26 / Yarn 4.18.1, `gh auth login`, PowerShell 7
-- `%USERPROFILE%\.config\template-rust-app\sign.env`에 Tauri 키 두 줄을 넣는다. 경로는 Windows 경로로 쓴다.
-- 개인키 파일도 같은 위치에 복사한다.
+- 업데이터 서명 키: 저장소 루트에서 아래를 한 번 실행하고, 물어보는 두 값(개인키 내용, 키 암호)을 붙여 넣는다. 자격 증명 관리자에 `tauri-updater-<앱>`, `tauri-updater-<앱>-pw`로 저장되고, `release-windows.ps1`이 같은 스크립트로 읽어 온다.
+
+  ```powershell
+  . scripts/load-updater-key-windows.ps1 -Save
+  ```
+
+  - `cmdkey /pass`는 길이 제한 때문에 개인키를 다 담지 못하므로 쓰지 않는다.
+  - 직접 `yarn tauri build`를 할 때는 먼저 `. scripts/load-updater-key-windows.ps1`을 실행한다.
 
 ### Yarn 버전 주의
 
@@ -110,9 +122,10 @@ Windows 빌드를 바로 할 수 없을 때는 macOS만 먼저 내보내고, Win
 
 ## 문제 해결
 
-- **`failed to decode secret key: ... Invalid symbol 46`**
-  - 원인: `TAURI_SIGNING_PRIVATE_KEY`가 경로인데 그 파일이 없다. 그래서 경로 문자열을 키 내용으로 읽으려다 실패한 것이다.
-  - 확인: `sign.env`의 경로에 오타(예: `.cofing`)가 없는지 본다.
-  - 이 오류는 공증까지 끝난 뒤 마지막에 나며, 그때는 릴리스에 아무것도 올라가지 않는다.
-- **`missing .../AuthKey_<ID>.p8`** 또는 `security: SecKeychainSearchCopyNext`: 키체인 항목(`tauri-apple-api-key`, `tauri-apple-api-issuer`)이나 `~/.config/apple/`의 `.p8`이 없다. 위 "macOS 장비"를 다시 본다.
+- **`failed to decode secret key: ... Invalid symbol`**
+  - 원인: 키체인/자격 증명 관리자의 `tauri-updater-<앱>`에 개인키 **내용**이 아닌 다른 값(파일 경로, 잘린 값)이 들어 있다.
+  - 확인: 위 "업데이터 서명 키"대로 다시 저장한다.
+  - macOS에서는 이 오류가 공증까지 끝난 뒤 마지막에 나며, 그때는 릴리스에 아무것도 올라가지 않는다.
+- **`Credential Manager has no tauri-updater-<앱>`**: Windows에서 위 "Windows PC"의 `-Save`를 하지 않았다.
+- **`missing .../AuthKey_<ID>.p8`** 또는 `security: SecKeychainSearchCopyNext`: 키체인 항목(`tauri-apple-api-key`, `tauri-apple-api-issuer`, `tauri-updater-<앱>`, `tauri-updater-<앱>-pw`)이나 `~/.config/apple/`의 `.p8`이 없다. 위 "macOS 장비"를 다시 본다.
 - **`src-tauri/tauri.conf.json: plugins.updater.pubkey is empty`**: 위 "업데이터 서명 키" 절차를 먼저 한다.
