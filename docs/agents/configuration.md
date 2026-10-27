@@ -10,7 +10,7 @@ related:
 
 # Configuration & Secrets
 
-> App config is `src-tauri/tauri.conf.json`. Webview permissions are in `src-tauri/capabilities/default.json`. Secrets (signing keys, Apple credentials, npm token) live **outside the repo**: `~/.config/template-rust-app/sign.env` and the `GITHUB_NPM_AUTH_TOKEN` env var. **Never commit a secret.**
+> App config is `src-tauri/tauri.conf.json`. Webview permissions are in `src-tauri/capabilities/default.json`. Secrets (signing keys, Apple credentials, npm token) live **outside the repo**: the login keychain, `~/.config/apple/`, `~/.config/template-rust-app/sign.env` and the `GITHUB_NPM_AUTH_TOKEN` env var. **Never commit a secret.**
 
 ## `tauri.conf.json`
 
@@ -33,8 +33,10 @@ related:
 
 | Secret | Where | Used by |
 | ------ | ----- | ------- |
-| Apple signing identity, Apple ID, app password, team ID | `~/.config/template-rust-app/sign.env` | `scripts/release.sh` (notarization) |
-| `TAURI_SIGNING_PRIVATE_KEY` (+ password) | `sign.env` on each release machine | `yarn tauri build`, both release scripts |
+| `APPLE_SIGNING_IDENTITY` (Developer ID) | `~/.config/apple/.env` (shared by all apps) | `scripts/build-mac.sh` (code signing) |
+| App Store Connect API key ID / issuer ID | login keychain, services `tauri-apple-api-key` / `tauri-apple-api-issuer` | `scripts/build-mac.sh` (notarization) |
+| App Store Connect API private key | `~/.config/apple/AuthKey_<key id>.p8` | `scripts/build-mac.sh` (`APPLE_API_KEY_PATH`) |
+| `TAURI_SIGNING_PRIVATE_KEY` (+ password) | `~/.config/template-rust-app/sign.env` on each release machine | `yarn tauri build`, `build-mac.sh`, `release.ps1` |
 | `GITHUB_NPM_AUTH_TOKEN` | shell env | `yarn install` (`@bob-park/*` from GitHub Packages) |
 | `GITHUB_TOKEN` | Actions-provided | `bump-version.yml` |
 

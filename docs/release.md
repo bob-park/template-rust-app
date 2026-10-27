@@ -25,16 +25,31 @@ yarn tauri signer generate -w ~/.config/template-rust-app/updater.key
 
 - `gh auth login`
 - 로그인 키체인에 `Developer ID Application` 인증서를 설치한다.
-- `~/.config/template-rust-app/sign.env`:
+- 공증은 App Store Connect **API 키** 방식이다(Apple ID/앱 암호 방식은 쓰지 않는다).
+  1. App Store Connect → 사용자 및 액세스 → 통합 → App Store Connect API에서 키를 만든다(액세스: Developer).
+  2. 내려받은 `AuthKey_<키 ID>.p8`을 `~/.config/apple/`에 둔다. 한 번만 내려받을 수 있으니 백업한다.
+  3. 키 ID와 발급자 ID(Issuer ID)를 로그인 키체인에 넣는다.
+
+     ```bash
+     security add-generic-password -a "$USER" -s tauri-apple-api-key -w '<키 ID>'
+     security add-generic-password -a "$USER" -s tauri-apple-api-issuer -w '<Issuer ID>'
+     ```
+
+- `~/.config/apple/.env` (앱 공통):
 
   ```bash
   APPLE_SIGNING_IDENTITY="Developer ID Application: ..."
-  APPLE_ID="..."
-  APPLE_PASSWORD="..."          # 앱 암호
-  APPLE_TEAM_ID="..."
+  ```
+
+- `~/.config/template-rust-app/sign.env` (앱마다):
+
+  ```bash
   TAURI_SIGNING_PRIVATE_KEY="/Users/<me>/.config/template-rust-app/updater.key"   # 절대 경로 또는 키 내용
   TAURI_SIGNING_PRIVATE_KEY_PASSWORD="..."
   ```
+
+- `sign.env`에 예전 `APPLE_ID`/`APPLE_PASSWORD`/`APPLE_TEAM_ID`가 남아 있으면 지운다. `APPLE_ID`가 있으면 Tauri가 API 키 대신 그쪽으로 공증한다.
+- 서명·공증된 앱만 만들어 보려면 `scripts/build-mac.sh`를 실행한다(업로드 없음). `release.sh`도 내부에서 이 스크립트로 빌드한다.
 
 ### Windows PC
 
@@ -99,4 +114,5 @@ Windows 빌드를 바로 할 수 없을 때는 macOS만 먼저 내보내고, Win
   - 원인: `TAURI_SIGNING_PRIVATE_KEY`가 경로인데 그 파일이 없다. 그래서 경로 문자열을 키 내용으로 읽으려다 실패한 것이다.
   - 확인: `sign.env`의 경로에 오타(예: `.cofing`)가 없는지 본다.
   - 이 오류는 공증까지 끝난 뒤 마지막에 나며, 그때는 릴리스에 아무것도 올라가지 않는다.
+- **`missing .../AuthKey_<ID>.p8`** 또는 `security: SecKeychainSearchCopyNext`: 키체인 항목(`tauri-apple-api-key`, `tauri-apple-api-issuer`)이나 `~/.config/apple/`의 `.p8`이 없다. 위 "macOS 장비"를 다시 본다.
 - **`src-tauri/tauri.conf.json: plugins.updater.pubkey is empty`**: 위 "업데이터 서명 키" 절차를 먼저 한다.

@@ -63,10 +63,12 @@ yarn lint                                               # ESLint + Prettier (@bo
 ```bash
 yarn tauri build --no-bundle   # 서명 키 없이 컴파일만 확인
 yarn tauri build               # .app/.dmg/NSIS 번들 + 업데이터 아티팩트 (서명 키 필요)
+scripts/build-mac.sh           # macOS: Developer ID 서명 + API 키 공증까지 한 .app/.dmg
 ```
 
-- 결과물은 `src-tauri/target/release/bundle/`에 생긴다.
+- 결과물은 `src-tauri/target/release/bundle/`에 생긴다. `release.sh`는 `--target aarch64-apple-darwin`으로 빌드하므로 `src-tauri/target/aarch64-apple-darwin/release/bundle/`에 생긴다.
 - `createUpdaterArtifacts`가 켜져 있어서 번들 빌드에는 `TAURI_SIGNING_PRIVATE_KEY`가 필요하다.
+- `scripts/build-mac.sh`는 키체인의 API 키 ID·Issuer ID와 `~/.config/apple/`, `~/.config/template-rust-app/sign.env`를 읽는다. 준비 방법은 [릴리스 절차의 macOS 장비](release.md#macos-장비)를 본다. 추가 인자는 `yarn tauri build`로 그대로 넘어간다.
 - 서명, 공증, GitHub 릴리스 업로드는 [릴리스 절차](release.md)를 따른다.
 
 ## 프로젝트 구조

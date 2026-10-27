@@ -9,7 +9,7 @@ related:
 
 # Release
 
-> Releases are built, signed and uploaded **locally**: `scripts/release.sh` (macOS: sign and notarize) and `scripts/release.ps1` (Windows: updater `.sig` only). `scripts/latest-json.mjs` then assembles `latest.json`. There is no CI build. The full procedure, in Korean, is in [docs/release.md](../../release.md).
+> Releases are built, signed and uploaded **locally**: `scripts/release.sh` (macOS: builds via `scripts/build-mac.sh`, which signs with Developer ID and notarizes with an App Store Connect API key) and `scripts/release.ps1` (Windows: updater `.sig` only). `scripts/latest-json.mjs` then assembles `latest.json`. There is no CI build. The full procedure, in Korean, is in [docs/release.md](../../release.md).
 
 ## Steps
 
@@ -22,6 +22,8 @@ related:
 ## Rules for agents
 
 - **Never run the release scripts or `gh release` commands without the user's explicit request.** They publish to users.
+- macOS notarization uses the **API key** method only (`APPLE_API_KEY`, `APPLE_API_ISSUER`, `APPLE_API_KEY_PATH`, set by `build-mac.sh`). Don't reintroduce `APPLE_ID`/`APPLE_PASSWORD`: if `APPLE_ID` is set, Tauri notarizes with it instead.
+- Running `scripts/build-mac.sh` alone builds and notarizes but uploads nothing. It still talks to Apple, so ask before running it.
 - If you change `productName`, update the file names in `release.sh` and `release.ps1`. `latest-json.mjs` matches on suffix only.
 - Both scripts refuse to run when `v<v>` is already **published** with that platform's build. A shipped version is never overwritten; bump the version instead (hotfix flow in [versioning](versioning.md)). Adding a platform that is still missing from a published release is allowed.
 - Releases are created with `--target main`, so the tag points at `main` even when `develop` is the repo's default branch.

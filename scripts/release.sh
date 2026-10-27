@@ -1,14 +1,9 @@
 #!/usr/bin/env bash
-# Builds, signs and notarizes the macOS app for Apple Silicon (Intel Macs are not
+# Builds, signs and notarizes the macOS app for Apple Silicon via build-mac.sh (Intel Macs are not
 # supported), then uploads the dmg, the updater bundle and its .sig to a draft
 # release. latest.json is assembled afterwards by scripts/latest-json.mjs.
 set -euo pipefail
 cd "$(dirname "$0")/.."
-
-set -a
-# shellcheck disable=SC1091
-source "$HOME/.config/template-rust-app/sign.env"
-set +a
 
 REPO="bob-park/template-rust-app"
 VERSION=$(node -p 'require("./src-tauri/tauri.conf.json").version')
@@ -23,7 +18,7 @@ if [ -n "$shipped" ]; then
   exit 1
 fi
 
-yarn tauri build --target aarch64-apple-darwin
+scripts/build-mac.sh --target aarch64-apple-darwin
 
 # --target main: the tag is cut from main, not the repo's default branch (often develop).
 gh release view "$TAG" -R "$REPO" >/dev/null 2>&1 \
