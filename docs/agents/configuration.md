@@ -33,10 +33,10 @@ related:
 
 | Secret | Where | Used by |
 | ------ | ----- | ------- |
-| `APPLE_SIGNING_IDENTITY` (Developer ID) | `~/.config/apple/.env` (shared by all apps) | `scripts/build-mac.sh` (code signing) |
-| App Store Connect API key ID / issuer ID | login keychain, services `tauri-apple-api-key` / `tauri-apple-api-issuer` | `scripts/build-mac.sh` (notarization) |
-| App Store Connect API private key | `~/.config/apple/AuthKey_<key id>.p8` | `scripts/build-mac.sh` (`APPLE_API_KEY_PATH`) |
-| `TAURI_SIGNING_PRIVATE_KEY` (+ password) | `~/.config/template-rust-app/sign.env` on each release machine | `yarn tauri build`, `build-mac.sh`, `release.ps1` |
+| `APPLE_SIGNING_IDENTITY` (Developer ID) | `~/.config/apple/.env` (shared by all apps) | `scripts/release-macos.sh` (code signing) |
+| App Store Connect API key ID / issuer ID | login keychain, services `tauri-apple-api-key` / `tauri-apple-api-issuer` | `scripts/release-macos.sh` (notarization) |
+| App Store Connect API private key | `~/.config/apple/AuthKey_<key id>.p8` | `scripts/release-macos.sh` (`APPLE_API_KEY_PATH`) |
+| `TAURI_SIGNING_PRIVATE_KEY` (+ password) | `~/.config/template-rust-app/sign.env` on each release machine | `yarn tauri build`, both release scripts |
 | `GITHUB_NPM_AUTH_TOKEN` | shell env | `yarn install` (`@bob-park/*` from GitHub Packages) |
 | `GITHUB_TOKEN` | Actions-provided | `bump-version.yml` |
 

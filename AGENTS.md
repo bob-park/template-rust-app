@@ -49,10 +49,10 @@ Find the matching entry in the Map or in "How to use", open that doc, and check 
 - [Commit Messages](docs/agents/workflow/commit-messages.md): `<prefix>: <subject>`
 - [Pull Requests](docs/agents/workflow/pr.md): base branch, title → version bump
 - [Versioning](docs/agents/workflow/versioning.md): semver, `bump-version-up.sh`, the `develop` workflow
-- [Release](docs/agents/workflow/release.md): local signed release scripts, macOS notarization via App Store Connect API key (`scripts/build-mac.sh`), `latest.json`
+- [Release](docs/agents/workflow/release.md): local signed release scripts per OS (`scripts/release-macos.sh`: Developer ID + App Store Connect API key notarization of `.app` and `.dmg`; `scripts/release-windows.ps1`), `latest.json`
 
 ### Ops
-- [Build & Run](docs/agents/build-run.md): dev, `--no-bundle`, full build, signed macOS build (`scripts/build-mac.sh`), gotchas
+- [Build & Run](docs/agents/build-run.md): dev, `--no-bundle`, full build, signed macOS build (`scripts/release-macos.sh --build-only`), gotchas
 - [Testing](docs/agents/testing.md): `cargo test`, `node:test`, typecheck, lint, what to test
 - [Configuration & Secrets](docs/agents/configuration.md): `tauri.conf.json`, capabilities, where secrets live
 - [Documentation](docs/agents/documentation.md): where docs go, format, languages

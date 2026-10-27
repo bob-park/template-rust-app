@@ -45,7 +45,7 @@ yarn tauri dev
   - `productName`, `identifier`, 창 `title`
   - `plugins.updater.endpoints`의 저장소 경로
   - `plugins.updater.pubkey`: [릴리스 절차](docs/release.md#처음-한-번)에서 생성
-- [ ] `scripts/build-mac.sh`, `scripts/release.sh`, `scripts/release.ps1`, `scripts/latest-json.mjs`:
+- [ ] `scripts/release-macos.sh`, `scripts/release-windows.ps1`, `scripts/latest-json.mjs`:
   - `REPO`
   - `~/.config/template-rust-app/sign.env` 경로
   - 번들 파일 이름의 `App_` / `App.app` 접두어 (productName과 같아야 한다)

@@ -18,7 +18,7 @@ related:
 - The skeleton is intentionally minimal but complete end to end. Every layer has one working example to copy:
   - frontend → command → domain → SQLite: `settings` (greeting, theme, language, auto-update)
   - app shell: window lifecycle, app menu, tray, updater, launch at login
-  - release: `scripts/build-mac.sh`, `scripts/release.sh`, `scripts/release.ps1`, `scripts/latest-json.mjs`
+  - release: `scripts/release-macos.sh`, `scripts/release-windows.ps1`, `scripts/latest-json.mjs`
   - versioning: `bump-version-up.sh` + `.github/workflows/bump-version.yml`
 
 ## What it is not

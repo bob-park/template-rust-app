@@ -49,7 +49,7 @@ yarn tauri signer generate -w ~/.config/template-rust-app/updater.key
   ```
 
 - `sign.env`에 예전 `APPLE_ID`/`APPLE_PASSWORD`/`APPLE_TEAM_ID`가 남아 있으면 지운다. `APPLE_ID`가 있으면 Tauri가 API 키 대신 그쪽으로 공증한다.
-- 서명·공증된 앱만 만들어 보려면 `scripts/build-mac.sh`를 실행한다(업로드 없음). `release.sh`도 내부에서 이 스크립트로 빌드한다.
+- 서명·공증된 앱만 만들어 보려면 `scripts/release-macos.sh --build-only`를 실행한다(업로드 없음). Tauri는 `.app`만 공증하므로, 스크립트가 빌드 뒤 `.dmg`도 `notarytool`로 공증하고 스테이플한다.
 
 ### Windows PC
 
@@ -68,10 +68,10 @@ yarn은 반드시 4.18.1(`../mise.toml`)로 실행한다. mise가 활성화되�
 
 1. **버전은 손으로 올리지 않는다.** `develop`에 PR이 머지되면 GitHub Actions가 `bump-version-up.sh`로 올린다. `main`에 `hotfix/*` PR이 머지될 때도 올린다. 버전이 들어가는 곳은 `tauri.conf.json`, `package.json`, `Cargo.toml`, `Cargo.lock`이다.
 2. `develop`을 `main`으로 머지하는 릴리스 PR을 만들고 머지한다. 이후 단계는 모두 `main`에서 한다. 릴리스 태그는 `--target main`으로 만들어져 항상 `main`을 가리킨다.
-3. macOS에서 `scripts/release.sh`를 실행한다. 빌드·서명·공증을 한 뒤 초안 릴리스 `v<버전>`에 다음 파일을 올린다.
+3. macOS에서 `scripts/release-macos.sh`를 실행한다. 빌드·서명·공증을 한 뒤 초안 릴리스 `v<버전>`에 다음 파일을 올린다.
    - `App_<버전>_aarch64.dmg`
    - `App_<버전>_aarch64.app.tar.gz`와 그 `.sig`
-4. Windows에서 `pwsh scripts/release.ps1`을 실행한다. 같은 릴리스에 `App_<버전>_x64-setup.exe`와 그 `.sig`를 올린다.
+4. Windows에서 `pwsh scripts/release-windows.ps1`을 실행한다. 같은 릴리스에 `App_<버전>_x64-setup.exe`와 그 `.sig`를 올린다.
 5. 3과 4는 순서가 상관없다. 둘 다 끝나면 릴리스 본문을 완성한다. 본문은 `latest.json`의 업데이트 노트로 들어간다.
 6. 아무 기계에서 `node scripts/latest-json.mjs v<버전>`을 실행한다. 릴리스의 `.sig`를 모아 `latest.json`을 만들어 올린다. 올라온 플랫폼만 들어간다.
 7. 출력된 플랫폼 목록에 `darwin-aarch64`와 `windows-x86_64`가 모두 있는지 확인한다.
@@ -96,7 +96,7 @@ Windows 빌드를 바로 할 수 없을 때는 macOS만 먼저 내보내고, Win
 
 나중에 Windows를 더할 때:
 
-1. Windows PC에서 `pwsh scripts/release.ps1`을 실행한다. 이미 게시된 같은 릴리스에 올라가고, 새 초안은 만들지 않는다.
+1. Windows PC에서 `pwsh scripts/release-windows.ps1`을 실행한다. 이미 게시된 같은 릴리스에 올라가고, 새 초안은 만들지 않는다.
 2. 아무 기계에서 `node scripts/latest-json.mjs v<버전>`을 다시 실행해 `latest.json`을 덮어쓴다. 출력에 두 플랫폼이 모두 있는지 확인한다. 이미 게시된 상태이므로 `--draft=false`는 다시 할 필요 없다.
 
 ## 핫픽스
