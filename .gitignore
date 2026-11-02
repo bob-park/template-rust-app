@@ -18,5 +18,12 @@ src-tauri/gen/
 .idea/
 .DS_Store
 
-# superpowers scratch (brainstorm mockups, plan ledgers)
+# AI / agent local workspaces
+# .claude/ is ignored wholesale; narrow to .claude/settings.local.json to commit shared settings or skills
+.claude/
 .superpowers/
+.taste-skill/
+.gstack/
+.context/
+.playwright-mcp/
+.ui-test-results/
