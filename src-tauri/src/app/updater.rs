@@ -14,14 +14,24 @@ const CHECK_EVERY: Duration = Duration::from_secs(6 * 60 * 60);
 pub const UPDATE_STATUS: &str = "update://status";
 
 #[derive(Clone, Debug, Default, PartialEq, Serialize)]
-#[serde(tag = "status", rename_all = "camelCase", rename_all_fields = "camelCase")]
+#[serde(
+    tag = "status",
+    rename_all = "camelCase",
+    rename_all_fields = "camelCase"
+)]
 pub enum UpdateStatus {
     #[default]
     Idle,
     Checking,
-    UpToDate { checked_at: i64 },
-    Ready { version: String },
-    Failed { checked_at: i64 },
+    UpToDate {
+        checked_at: i64,
+    },
+    Ready {
+        version: String,
+    },
+    Failed {
+        checked_at: i64,
+    },
 }
 
 #[derive(Default)]
@@ -42,7 +52,10 @@ impl UpdateState {
 }
 
 fn now_ms() -> i64 {
-    SystemTime::now().duration_since(UNIX_EPOCH).map(|d| d.as_millis() as i64).unwrap_or(0)
+    SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map(|d| d.as_millis() as i64)
+        .unwrap_or(0)
 }
 
 fn set_status(app: &AppHandle, status: UpdateStatus) {
@@ -61,20 +74,34 @@ fn needs_download(pending: Option<&str>, latest: &str) -> bool {
 async fn fetch_latest(app: &AppHandle) -> tauri_plugin_updater::Result<Option<String>> {
     let state = app.state::<UpdateState>();
     let _guard = state.download.lock().await;
-    let Some(update) = app.updater()?.check().await? else { return Ok(None) };
-    let pending = state.pending.lock().unwrap().as_ref().map(|(u, _)| u.version.clone());
+    let Some(update) = app.updater()?.check().await? else {
+        return Ok(None);
+    };
+    let pending = state
+        .pending
+        .lock()
+        .unwrap()
+        .as_ref()
+        .map(|(u, _)| u.version.clone());
     if needs_download(pending.as_deref(), &update.version) {
         let bytes = update.download(|_, _| {}, || {}).await?;
         *state.pending.lock().unwrap() = Some((update, bytes));
     }
-    Ok(state.pending.lock().unwrap().as_ref().map(|(u, _)| u.version.clone()))
+    Ok(state
+        .pending
+        .lock()
+        .unwrap()
+        .as_ref()
+        .map(|(u, _)| u.version.clone()))
 }
 
 /// Swaps a ready update for a newer release if one shipped since it was downloaded.
 /// Failures keep the ready update, so the user can still install it.
 async fn refresh_ready(app: &AppHandle) -> UpdateStatus {
     match fetch_latest(app).await {
-        Ok(Some(version)) if app.state::<UpdateState>().ready_version().as_ref() != Some(&version) => {
+        Ok(Some(version))
+            if app.state::<UpdateState>().ready_version().as_ref() != Some(&version) =>
+        {
             set_status(app, UpdateStatus::Ready { version });
         }
         Ok(_) => {}
@@ -103,10 +130,14 @@ pub async fn check(app: &AppHandle) -> UpdateStatus {
     set_status(app, UpdateStatus::Checking);
     let status = match fetch_latest(app).await {
         Ok(Some(version)) => UpdateStatus::Ready { version },
-        Ok(None) => UpdateStatus::UpToDate { checked_at: now_ms() },
+        Ok(None) => UpdateStatus::UpToDate {
+            checked_at: now_ms(),
+        },
         Err(e) => {
             log::warn!("update check failed: {e}");
-            UpdateStatus::Failed { checked_at: now_ms() }
+            UpdateStatus::Failed {
+                checked_at: now_ms(),
+            }
         }
     };
     set_status(app, status.clone());
@@ -119,7 +150,9 @@ pub async fn install_and_restart(app: &AppHandle) -> Result<(), String> {
     // Borrow, don't take: a failed install keeps the download so the user can retry.
     let state = app.state::<UpdateState>();
     let pending = state.pending.lock().unwrap();
-    let Some((update, bytes)) = pending.as_ref() else { return Err("no update has been downloaded".into()) };
+    let Some((update, bytes)) = pending.as_ref() else {
+        return Err("no update has been downloaded".into());
+    };
     update.install(bytes).map_err(|e| e.to_string())?;
     drop(pending);
     app.restart();
@@ -130,12 +163,15 @@ pub fn spawn_periodic(app: AppHandle) {
     if cfg!(debug_assertions) {
         return;
     }
-    std::thread::spawn(move || loop {
-        let enabled = settings::auto_update(&app.state::<AppState>().db.lock().unwrap()).unwrap_or(true);
-        if enabled {
-            tauri::async_runtime::block_on(check(&app));
+    std::thread::spawn(move || {
+        loop {
+            let enabled =
+                settings::auto_update(&app.state::<AppState>().db.lock().unwrap()).unwrap_or(true);
+            if enabled {
+                tauri::async_runtime::block_on(check(&app));
+            }
+            std::thread::sleep(CHECK_EVERY);
         }
-        std::thread::sleep(CHECK_EVERY);
     });
 }
 
@@ -169,8 +205,15 @@ mod tests {
 
     #[test]
     fn begin_check_keeps_a_ready_update() {
-        let status = Mutex::new(UpdateStatus::Ready { version: "0.2.0".into() });
-        assert_eq!(begin_check(&status), Some(UpdateStatus::Ready { version: "0.2.0".into() }));
+        let status = Mutex::new(UpdateStatus::Ready {
+            version: "0.2.0".into(),
+        });
+        assert_eq!(
+            begin_check(&status),
+            Some(UpdateStatus::Ready {
+                version: "0.2.0".into()
+            })
+        );
     }
 
     #[test]
@@ -184,13 +227,18 @@ mod tests {
     #[test]
     fn status_serializes_like_the_typescript_union() {
         let json = |s: UpdateStatus| serde_json::to_value(s).unwrap();
-        assert_eq!(json(UpdateStatus::Idle), serde_json::json!({ "status": "idle" }));
+        assert_eq!(
+            json(UpdateStatus::Idle),
+            serde_json::json!({ "status": "idle" })
+        );
         assert_eq!(
             json(UpdateStatus::UpToDate { checked_at: 5 }),
             serde_json::json!({ "status": "upToDate", "checkedAt": 5 })
         );
         assert_eq!(
-            json(UpdateStatus::Ready { version: "0.2.0".into() }),
+            json(UpdateStatus::Ready {
+                version: "0.2.0".into()
+            }),
             serde_json::json!({ "status": "ready", "version": "0.2.0" })
         );
     }

@@ -5,7 +5,9 @@ use rusqlite::{Connection, OptionalExtension, params};
 
 pub fn get(conn: &Connection, key: &str) -> AppResult<Option<String>> {
     Ok(conn
-        .query_row("SELECT value FROM settings WHERE key = ?1", [key], |r| r.get(0))
+        .query_row("SELECT value FROM settings WHERE key = ?1", [key], |r| {
+            r.get(0)
+        })
         .optional()?)
 }
 

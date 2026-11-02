@@ -14,7 +14,7 @@
 - 새 기능과 리팩토링은 `superpowers:brainstorming` → `superpowers:writing-plans` → `superpowers:executing-plans` 순서로 진행한다.
 - 디버깅: `superpowers:systematic-debugging`
 - 완료 직전 검증: `superpowers:verification-before-completion`
-  - `cargo test --manifest-path src-tauri/Cargo.toml --lib`, `yarn test`, `yarn typecheck`, `yarn lint`를 모두 통과해야 한다.
+  - `cargo test --manifest-path src-tauri/Cargo.toml --lib`, `cargo fmt --manifest-path src-tauri/Cargo.toml --check`, `yarn test`, `yarn typecheck`, `yarn lint`를 모두 통과해야 한다.
 - 라이브러리 API(Tauri, React Query, daisyUI 등)는 기억에 의존하지 않고 최신 문서를 확인한다.
 
 ### UI 작업

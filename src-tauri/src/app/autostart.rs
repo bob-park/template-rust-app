@@ -11,6 +11,11 @@ pub fn get_autostart(app: AppHandle) -> Result<bool, String> {
 #[tauri::command]
 pub fn set_autostart(app: AppHandle, enabled: bool) -> Result<bool, String> {
     let launcher = app.autolaunch();
-    if enabled { launcher.enable() } else { launcher.disable() }.map_err(|e| e.to_string())?;
+    if enabled {
+        launcher.enable()
+    } else {
+        launcher.disable()
+    }
+    .map_err(|e| e.to_string())?;
     Ok(enabled)
 }

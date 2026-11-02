@@ -18,7 +18,11 @@ pub fn resolve(pref: LocalePref) -> &'static str {
     match pref {
         LocalePref::Ko => "ko",
         LocalePref::En => "en",
-        LocalePref::System if sys_locale::get_locale().is_some_and(|l| l.to_lowercase().starts_with("ko")) => "ko",
+        LocalePref::System
+            if sys_locale::get_locale().is_some_and(|l| l.to_lowercase().starts_with("ko")) =>
+        {
+            "ko"
+        }
         LocalePref::System => "en",
     }
 }

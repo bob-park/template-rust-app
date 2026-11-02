@@ -10,11 +10,12 @@ related:
 
 # Testing
 
-> Rust: `cargo test --manifest-path src-tauri/Cargo.toml --lib` (domain core, DB, errors). Frontend and scripts: `yarn test` (Node built-in `node:test`, no extra libraries). Plus `yarn typecheck` and `yarn lint`. All four must pass before a change is done.
+> Rust: `cargo test --manifest-path src-tauri/Cargo.toml --lib` (domain core, DB, errors), plus `cargo fmt --manifest-path src-tauri/Cargo.toml --check` (rules in `src-tauri/rustfmt.toml`). Frontend and scripts: `yarn test` (Node built-in `node:test`, no extra libraries). Plus `yarn typecheck` and `yarn lint`. All five must pass before a change is done.
 
 | Command | Covers | Lives in |
 | ------- | ------ | -------- |
 | `cargo test --manifest-path src-tauri/Cargo.toml --lib` | domain APIs, repositories, migrations, `AppError` serialization, `UpdateStatus` shape, i18n resolution | `#[cfg(test)] mod tests` at the bottom of each Rust file |
+| `cargo fmt --manifest-path src-tauri/Cargo.toml --check` | Rust formatting (`src-tauri/rustfmt.toml`); run without `--check` to fix | — |
 | `yarn test` | pure TS logic (`src/**/*.test.ts`) and scripts (`scripts/*.test.mjs`) | next to the file under test |
 | `yarn typecheck` | types, including missing i18n keys | — |
 | `yarn lint` | ESLint + Prettier | — |

@@ -8,7 +8,13 @@ use tauri::{AppHandle, Wry};
 pub fn build(app: &AppHandle) -> tauri::Result<Menu<Wry>> {
     let menu = Menu::default(app)?;
     if let Some(MenuItemKind::Submenu(app_menu)) = menu.items()?.first() {
-        let settings = MenuItem::with_id(app, "settings", i18n::current(app).settings_menu, true, Some("CmdOrCtrl+,"))?;
+        let settings = MenuItem::with_id(
+            app,
+            "settings",
+            i18n::current(app).settings_menu,
+            true,
+            Some("CmdOrCtrl+,"),
+        )?;
         // After "About" and its separator.
         app_menu.insert(&settings, 2)?;
     }

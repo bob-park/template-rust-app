@@ -17,21 +17,29 @@ pub fn greeting(conn: &Connection) -> AppResult<String> {
 
 /// A missing or unknown stored value means the user never picked one: follow the OS.
 pub fn theme(conn: &Connection) -> AppResult<Theme> {
-    Ok(repository::get(conn, "theme")?.as_deref().and_then(Theme::parse).unwrap_or(Theme::System))
+    Ok(repository::get(conn, "theme")?
+        .as_deref()
+        .and_then(Theme::parse)
+        .unwrap_or(Theme::System))
 }
 
 pub fn set_theme(conn: &Connection, raw: &str) -> AppResult<Theme> {
-    let theme = Theme::parse(raw).ok_or_else(|| AppError::InvalidInput(format!("unknown theme: {raw}")))?;
+    let theme =
+        Theme::parse(raw).ok_or_else(|| AppError::InvalidInput(format!("unknown theme: {raw}")))?;
     repository::set(conn, "theme", theme.as_str())?;
     Ok(theme)
 }
 
 pub fn locale(conn: &Connection) -> AppResult<LocalePref> {
-    Ok(repository::get(conn, "locale")?.as_deref().and_then(LocalePref::parse).unwrap_or(LocalePref::System))
+    Ok(repository::get(conn, "locale")?
+        .as_deref()
+        .and_then(LocalePref::parse)
+        .unwrap_or(LocalePref::System))
 }
 
 pub fn set_locale(conn: &Connection, raw: &str) -> AppResult<LocalePref> {
-    let locale = LocalePref::parse(raw).ok_or_else(|| AppError::InvalidInput(format!("unknown locale: {raw}")))?;
+    let locale = LocalePref::parse(raw)
+        .ok_or_else(|| AppError::InvalidInput(format!("unknown locale: {raw}")))?;
     repository::set(conn, "locale", locale.as_str())?;
     Ok(locale)
 }
@@ -68,8 +76,14 @@ mod tests {
     #[test]
     fn set_theme_rejects_unknown_value() {
         let conn = db::open_in_memory().unwrap();
-        assert!(matches!(set_theme(&conn, "blue"), Err(AppError::InvalidInput(_))));
-        assert_eq!(repository::get(&conn, "theme").unwrap().as_deref(), Some("system"));
+        assert!(matches!(
+            set_theme(&conn, "blue"),
+            Err(AppError::InvalidInput(_))
+        ));
+        assert_eq!(
+            repository::get(&conn, "theme").unwrap().as_deref(),
+            Some("system")
+        );
     }
 
     #[test]
@@ -88,7 +102,10 @@ mod tests {
     #[test]
     fn set_locale_rejects_unknown_value() {
         let conn = db::open_in_memory().unwrap();
-        assert!(matches!(set_locale(&conn, "fr"), Err(AppError::InvalidInput(_))));
+        assert!(matches!(
+            set_locale(&conn, "fr"),
+            Err(AppError::InvalidInput(_))
+        ));
         assert_eq!(repository::get(&conn, "locale").unwrap(), None);
         assert_eq!(set_locale(&conn, "ko").unwrap(), LocalePref::Ko);
         assert_eq!(locale(&conn).unwrap(), LocalePref::Ko);

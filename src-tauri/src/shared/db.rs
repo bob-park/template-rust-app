@@ -28,7 +28,10 @@ fn migrate(conn: &mut Connection) -> AppResult<()> {
     let supported = MIGRATIONS.len() as i64;
     if current > supported {
         // Running against a schema we don't know could corrupt user data: stop instead.
-        return Err(AppError::SchemaTooNew { found: current, supported });
+        return Err(AppError::SchemaTooNew {
+            found: current,
+            supported,
+        });
     }
     for (i, sql) in MIGRATIONS.iter().enumerate().skip(current as usize) {
         let tx = conn.transaction()?;
@@ -48,9 +51,15 @@ mod tests {
     fn refuses_a_database_from_a_newer_app() {
         let dir = tempfile::tempdir().unwrap();
         let path = dir.path().join("app.db");
-        open(&path).unwrap().pragma_update(None, "user_version", 99).unwrap();
+        open(&path)
+            .unwrap()
+            .pragma_update(None, "user_version", 99)
+            .unwrap();
         let err = open(&path).unwrap_err();
-        assert!(matches!(err, AppError::SchemaTooNew { found: 99, .. }), "{err:?}");
+        assert!(
+            matches!(err, AppError::SchemaTooNew { found: 99, .. }),
+            "{err:?}"
+        );
         assert_eq!(err.code(), "SCHEMA_TOO_NEW");
     }
 
@@ -69,8 +78,13 @@ mod tests {
         repository::set(&open(&path).unwrap(), "greeting", "Hi").unwrap();
 
         let conn = open(&path).unwrap();
-        assert_eq!(repository::get(&conn, "greeting").unwrap().as_deref(), Some("Hi"));
-        let version: i64 = conn.query_row("PRAGMA user_version", [], |r| r.get(0)).unwrap();
+        assert_eq!(
+            repository::get(&conn, "greeting").unwrap().as_deref(),
+            Some("Hi")
+        );
+        let version: i64 = conn
+            .query_row("PRAGMA user_version", [], |r| r.get(0))
+            .unwrap();
         assert_eq!(version, MIGRATIONS.len() as i64);
     }
 }

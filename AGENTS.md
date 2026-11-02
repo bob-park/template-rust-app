@@ -53,7 +53,7 @@ Find the matching entry in the Map or in "How to use", open that doc, and check 
 
 ### Ops
 - [Build & Run](docs/agents/build-run.md): dev, `--no-bundle`, full build, signed macOS build (`scripts/release-macos.sh --build-only`), gotchas
-- [Testing](docs/agents/testing.md): `cargo test`, `node:test`, typecheck, lint, what to test
+- [Testing](docs/agents/testing.md): `cargo test`, `cargo fmt`, `node:test`, typecheck, lint, what to test
 - [Configuration & Secrets](docs/agents/configuration.md): `tauri.conf.json`, capabilities, where secrets live
 - [Documentation](docs/agents/documentation.md): where docs go, format, languages
 
@@ -83,4 +83,4 @@ These conventions apply to **new code and to existing code being substantially m
 
 - Don't refactor pre-existing code that doesn't conform as part of an unrelated change. Track it separately, in a follow-up note in the PR description or in its own `refactor:` PR.
 - Where an example shows a pattern that existing code doesn't follow yet, the example is the target for new code. It is not a directive to backfill.
-- Before calling a change done, run the four checks in [testing](docs/agents/testing.md). For UI changes, also look at the running app in light/dark and ko/en.
+- Before calling a change done, run the five checks in [testing](docs/agents/testing.md). For UI changes, also look at the running app in light/dark and ko/en.

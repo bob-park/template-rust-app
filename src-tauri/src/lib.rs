@@ -10,16 +10,27 @@ use tauri::Manager;
 pub fn run() {
     tauri::Builder::default()
         // Must be first: a second launch focuses the existing window.
-        .plugin(tauri_plugin_single_instance::init(|app, _argv, _cwd| app::window::show_main(app)))
-        .plugin(tauri_plugin_log::Builder::new().level(log::LevelFilter::Info).build())
-        .plugin(tauri_plugin_autostart::init(tauri_plugin_autostart::MacosLauncher::LaunchAgent, None))
+        .plugin(tauri_plugin_single_instance::init(|app, _argv, _cwd| {
+            app::window::show_main(app)
+        }))
+        .plugin(
+            tauri_plugin_log::Builder::new()
+                .level(log::LevelFilter::Info)
+                .build(),
+        )
+        .plugin(tauri_plugin_autostart::init(
+            tauri_plugin_autostart::MacosLauncher::LaunchAgent,
+            None,
+        ))
         .plugin(tauri_plugin_updater::Builder::new().build())
         .manage(app::updater::UpdateState::default())
         .setup(|app| {
             // ponytail: a DB open failure aborts setup; add an error dialog (tauri-plugin-dialog,
             // as in vee-app) once real user data is at stake.
             let conn = shared::db::open(&app.path().app_data_dir()?.join("app.db"))?;
-            app.manage(AppState { db: Mutex::new(conn) });
+            app.manage(AppState {
+                db: Mutex::new(conn),
+            });
             // After manage(): menu labels read the stored language.
             #[cfg(target_os = "macos")]
             {
@@ -52,7 +63,11 @@ pub fn run() {
         .run(|_app, _event| {
             // Dock icon click with no visible window.
             #[cfg(target_os = "macos")]
-            if let tauri::RunEvent::Reopen { has_visible_windows: false, .. } = _event {
+            if let tauri::RunEvent::Reopen {
+                has_visible_windows: false,
+                ..
+            } = _event
+            {
                 app::window::show_main(_app);
             }
         });

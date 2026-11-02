@@ -51,6 +51,7 @@ yarn tauri dev
 
 ```bash
 cargo test --manifest-path src-tauri/Cargo.toml --lib   # Rust: DB/마이그레이션, 도메인, 에러 직렬화, 업데이트 상태
+cargo fmt --manifest-path src-tauri/Cargo.toml --check  # Rust 포맷 검사 (src-tauri/rustfmt.toml)
 yarn test                                               # 프론트 순수 로직(src/**/*.test.ts) + 스크립트(scripts/*.test.mjs), node:test
 yarn typecheck                                          # TypeScript 타입 검사 (ko 사전 키 누락도 여기서 잡힌다)
 yarn lint                                               # ESLint + Prettier (@bob-park 설정)
