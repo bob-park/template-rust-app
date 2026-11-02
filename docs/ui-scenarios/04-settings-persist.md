@@ -11,7 +11,7 @@
 5. Restore the original values.
 
 ## Expected
-- Step 2: the UI switches theme and language immediately, in both windows and in the tray/menu labels (`open`, `settings`, `quit` in `src-tauri/src/app/i18n.rs`).
+- Step 2: the UI switches theme and language immediately, in both windows, the settings window title (`settings`), the tray labels (`open`, `settings`, `quit`), and the macOS app-menu item (`settings_menu` "Settings…" / "설정…"), all in `src-tauri/src/app/i18n.rs`.
 - Step 4: every value from steps 2–3 is unchanged after relaunch.
 - Launch-at-login state matches the OS (macOS Login Items / Windows startup) — verify with a screenshot of the OS setting only if the user allows touching it; otherwise `UNVERIFIED`.
 - No `role="alert"`.

@@ -16,6 +16,7 @@ related:
 | `CLAUDE.md` | `@AGENTS.md` + Claude Code-only rules | Korean |
 | `docs/agents/**` | conventions, libs, workflow | English |
 | `docs/design/` | design system prompts/specs — read before UI work | as written |
+| `docs/ui-scenarios/` | P0 + app UI test scenarios for agent-desktop ([ui-testing](./ui-testing.md)) | English |
 | `docs/development.md` | dev setup, run, test, build, project tree | Korean |
 | `docs/release.md` | release procedure | Korean |
 | `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md` | design specs | Korean |

@@ -11,27 +11,34 @@ related:
 
 # UI Testing (agent-desktop)
 
-> Look at and drive the running app with `agent-desktop`: read the app name from `tauri.conf.json`, then loop snapshot → act → snapshot using refs from the latest snapshot only. Scenarios live in `docs/ui-scenarios/`, reports in `.ui-test-results/` (git-ignored). Interactive elements need i18n-backed accessible names, or they can't be tested.
+> Look at and drive the running app with `agent-desktop`: read the app name from the config (dev: Cargo package name, release: `productName`), then loop snapshot → act → snapshot using refs from the latest snapshot only. Scenarios live in `docs/ui-scenarios/`, reports in `.ui-test-results/` (git-ignored). Interactive elements need i18n-backed accessible names, or they can't be tested.
 
 ## Setup
 
-Nothing here is per-app. Read the app's values from the config at the start of every session, so a renamed app needs no doc change.
+Nothing here is per-app. Read the app's name from the config at the start of every session, so a renamed app needs no doc change. The name agent-desktop sees depends on how the app was started:
+
+| Run | App name in `list-apps` | Source |
+| --- | ----------------------- | ------ |
+| `yarn tauri dev` (unbundled binary) | Cargo package name, e.g. `template-rust-app` | `src-tauri/Cargo.toml` `[package].name` |
+| Release bundle | `productName`, e.g. `App` | `src-tauri/tauri.conf.json` |
 
 ```bash
-# macOS / Linux
+# macOS / Linux: dev
+APP_NAME=$(sed -n 's/^name = "\(.*\)"/\1/p' src-tauri/Cargo.toml | head -1)
+# macOS / Linux: release bundle
 APP_NAME=$(jq -r .productName src-tauri/tauri.conf.json)
-BUNDLE_ID=$(jq -r .identifier src-tauri/tauri.conf.json)
-
-# No jq: same values through mise's Node
+# release, no jq: through mise's Node
 APP_NAME=$(mise exec -- node -p "require('./src-tauri/tauri.conf.json').productName")
 ```
 
 ```powershell
-# Windows
-$conf = Get-Content src-tauri/tauri.conf.json | ConvertFrom-Json
-$APP_NAME = $conf.productName
-$BUNDLE_ID = $conf.identifier
+# Windows: dev
+$APP_NAME = (Select-String -Path src-tauri/Cargo.toml -Pattern '^name = "(.*)"' | Select-Object -First 1).Matches.Groups[1].Value
+# Windows: release bundle
+$APP_NAME = (Get-Content -Raw src-tauri/tauri.conf.json | ConvertFrom-Json).productName
 ```
+
+Confirm with `agent-desktop list-apps` before the first snapshot.
 
 | Item | Value |
 | ---- | ----- |
@@ -72,8 +79,10 @@ agent-desktop permissions --guide   # macOS: grant Accessibility to the terminal
 
 ### Windows in this template
 
-- Two webview windows: `main` and `settings` (`src-tauri/tauri.conf.json`). Settings opens from the app menu or the tray. With both open, `--app` alone is ambiguous: take the window from `list-windows` and pass `--window-id`.
-- The tray menu and the app menu are native OS elements, not webview content. Find them with `list-surfaces`.
+- Two webview windows: `main` and `settings` (`src-tauri/tauri.conf.json`; titles come from `app.windows[].title`, and the settings title follows the app language, e.g. `설정`). Settings opens from the app menu, the tray, or `cmd+,` / `ctrl+,`. With both open, `--app` alone is ambiguous: take the window from `list-windows` and pass `--window-id`. `list-windows` also lists helper windows with the app name as title; pick by the real title.
+- The settings window is fixed-size (`"resizable": false`).
+- Keys go to the focused window: for `press`, `--window-id` selects the app instance, not the window. Aim keys with `focus-window` first.
+- The tray menu and the macOS app menu are native OS elements, not webview content. Find them with `list-surfaces`. Windows has no app menu.
 
 ### Observe → act → verify
 
@@ -142,7 +151,7 @@ One file per scenario: `docs/ui-scenarios/<NN>-<name>.md`, in English.
 - …
 ```
 
-The P0 set in `docs/ui-scenarios/` (01–07) must pass for every app built from this template. Add app-specific scenarios after them.
+The P0 set in `docs/ui-scenarios/` (01–07) must pass, or be marked `N/A` with the reason the scenario states, for every app built from this template. Add app-specific scenarios after them.
 
 ## Reports
 

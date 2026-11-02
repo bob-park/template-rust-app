@@ -7,12 +7,12 @@
 1. `resize-window` the main window small (e.g. 400×300), then large (e.g. 1200×800). Screenshot each.
 2. `minimize`, then `restore`. Snapshot.
 3. `move-window` to another position (another display if `list-displays` shows one). Screenshot.
-4. Open Settings (`cmd+,` / `ctrl+,`) and repeat steps 1–3 on the settings window (`--window-id`).
+4. Open Settings (`cmd+,` / `ctrl+,`) and repeat steps 2–3 on the settings window (`--window-id`). It is fixed-size (`"resizable": false`), so skip resizing.
 
 ## Expected
 - The greeting card stays centered and unclipped at every size.
 - Settings tabs and rows don't overlap or overflow; the panel scrolls instead of cutting content.
-- After restore, the snapshot matches the one before minimize.
+- After restore, the snapshot has the same structure, names, and states as before minimize (refs differ).
 
 ## UX checks
 - Is the minimum usable size sensible, or does the layout break before the OS stops resizing?
