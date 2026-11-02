@@ -54,6 +54,7 @@ Find the matching entry in the Map or in "How to use", open that doc, and check 
 ### Ops
 - [Build & Run](docs/agents/build-run.md): dev, `--no-bundle`, full build, signed macOS build (`scripts/release-macos.sh --build-only`), gotchas
 - [Testing](docs/agents/testing.md): `cargo test`, `cargo fmt`, `node:test`, typecheck, lint, what to test
+- [UI Testing](docs/agents/ui-testing.md): drive the running app with agent-desktop, app name from `tauri.conf.json`, P0 scenarios in `docs/ui-scenarios/`, reports, accessible names
 - [Configuration & Secrets](docs/agents/configuration.md): `tauri.conf.json`, capabilities, where secrets live
 - [Documentation](docs/agents/documentation.md): where docs go, format, languages
 
@@ -69,6 +70,7 @@ Find the matching entry in the Map or in "How to use", open that doc, and check 
 - **New error case:** [error-handling](docs/agents/conventions/error-handling.md)
 - **Window, menu, tray, or startup change:** [architecture](docs/agents/architecture.md) → [rust-modules](docs/agents/conventions/rust-modules.md)
 - **Running, building, or testing:** [build-run](docs/agents/build-run.md) → [testing](docs/agents/testing.md)
+- **Seeing, driving, or UI-testing the running app:** [ui-testing](docs/agents/ui-testing.md) → [build-run](docs/agents/build-run.md)
 - **Config, permissions, or secrets:** [configuration](docs/agents/configuration.md)
 - **Starting a branch:** [branching](docs/agents/workflow/branching.md)
 - **Writing a commit message:** [commit-messages](docs/agents/workflow/commit-messages.md)
