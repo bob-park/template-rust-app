@@ -10,7 +10,7 @@ related:
 
 # Build & Run
 
-> `yarn tauri dev` runs the app with hot reload. `yarn tauri build --no-bundle` checks a release compile without signing keys. A full `yarn tauri build` needs the updater signing key. Releases go through the scripts in [release](./workflow/release.md).
+> `yarn dotenv -e .env.development.local -- yarn tauri dev` runs the app with hot reload. `yarn tauri build --no-bundle` checks a release compile without signing keys. A full `yarn tauri build` needs the updater signing key. Releases go through the scripts in [release](./workflow/release.md).
 
 ## Setup
 
@@ -26,7 +26,7 @@ Always use Yarn 4.18.1 (mise). A global Yarn 1 rewrites `yarn.lock`.
 
 | Command | What it does |
 | ------- | ------------ |
-| `yarn tauri dev` | Vite on :1420 + debug Rust app; frontend hot-reloads, Rust/config changes rebuild and restart |
+| `yarn dotenv -e .env.development.local -- yarn tauri dev` | loads `.env.development.local`, then Vite on :1420 + debug Rust app; frontend hot-reloads, Rust/config changes rebuild and restart |
 | `yarn tauri build --no-bundle` | release compile, no `.app`/installer, no signing key needed |
 | `yarn tauri build` | bundles (`.app`, `.dmg`, NSIS) + updater artifacts; needs `TAURI_SIGNING_PRIVATE_KEY` (first `source scripts/load-updater-key-macos.sh` on macOS, `. scripts/load-updater-key-windows.ps1` on Windows) |
 | `scripts/release-macos.sh --build-only` | macOS `.app` + `.dmg` (Apple Silicon), Developer ID signed; both notarized and stapled with the App Store Connect API key; no upload ([configuration](./configuration.md#secrets)) |

@@ -20,7 +20,7 @@
 ### UI 작업
 
 - UI를 만들거나 바꾸기 전에 반드시 `docs/design/`과 [design](docs/agents/design.md)을 먼저 읽는다.
-- 화면을 바꾸면 `yarn tauri dev`로 띄워서 직접 본다. 라이트/다크 두 테마와 한국어/English 두 언어를 모두 확인한다.
+- 화면을 바꾸면 `yarn dotenv -e .env.development.local -- yarn tauri dev`로 띄워서 직접 본다. 라이트/다크 두 테마와 한국어/English 두 언어를 모두 확인한다.
 
 ### Language
 

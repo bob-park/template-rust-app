@@ -30,9 +30,10 @@ yarn install
 ## 개발 실행
 
 ```bash
-yarn tauri dev
+yarn dotenv -e .env.development.local -- yarn tauri dev
 ```
 
+- `.env.development.local`의 환경 변수를 읽어서 `yarn tauri dev`를 실행한다.
 - Vite 개발 서버(`http://localhost:1420`)와 Rust 앱이 함께 뜬다.
   - 프론트 코드는 즉시 반영된다.
   - Rust 코드나 `tauri.conf.json`을 바꾸면 앱이 다시 빌드되고 재시작된다.

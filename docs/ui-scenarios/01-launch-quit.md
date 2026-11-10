@@ -4,7 +4,7 @@
 - Preconditions: app not running. `APP_NAME` set for the run mode ([ui-testing](../agents/ui-testing.md#setup)).
 
 ## Steps
-1. Run `yarn tauri dev` (or the release bundle). `wait` for a window of `"$APP_NAME"`.
+1. Run `yarn dotenv -e .env.development.local -- yarn tauri dev` (or the release bundle). `wait` for a window of `"$APP_NAME"`.
 2. `list-windows --app "$APP_NAME"`, then snapshot the main window.
 3. Close the main window: macOS `focus-window` + `press cmd+w`; Windows the title-bar close button (there is no app menu, so `ctrl+w` does nothing).
 4. Open the tray menu (`list-surfaces`) and choose Open.

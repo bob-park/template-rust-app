@@ -42,7 +42,7 @@ Confirm with `agent-desktop list-apps` before the first snapshot.
 
 | Item | Value |
 | ---- | ----- |
-| Dev run | `yarn tauri dev` (through mise, see [build-run](./build-run.md)) |
+| Dev run | `yarn dotenv -e .env.development.local -- yarn tauri dev` (through mise, see [build-run](./build-run.md)) |
 | Release build | see [build-run](./build-run.md) |
 | Scenarios | `docs/ui-scenarios/` |
 | Results | `.ui-test-results/<YYYYMMDD-HHmm>/` (git-ignored) |
@@ -73,7 +73,7 @@ agent-desktop permissions --guide   # macOS: grant Accessibility to the terminal
 
 ### Launch
 
-1. Dev testing: `yarn tauri dev`. Release verification: run the built bundle.
+1. Dev testing: `yarn dotenv -e .env.development.local -- yarn tauri dev`. Release verification: run the built bundle.
 2. Confirm it's up: `agent-desktop list-apps`, `agent-desktop list-windows --app "$APP_NAME"`.
 3. The first `tauri dev` compile is slow. Use `agent-desktop wait` (see `--help`) for the window, never a fixed sleep.
 

@@ -26,7 +26,7 @@ Tauri 2 데스크톱 앱 템플릿이다. Rust와 React(TypeScript)로 만든다
 mise install
 export GITHUB_NPM_AUTH_TOKEN=<GitHub PAT, read:packages>
 yarn install
-yarn tauri dev
+yarn dotenv -e .env.development.local -- yarn tauri dev
 ```
 
 - [개발 환경 구성과 빌드](docs/development.md)
