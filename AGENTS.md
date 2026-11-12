@@ -17,6 +17,15 @@ Find the matching entry in the Map or in "How to use", open that doc, and check 
   yarn dotenv -e .env.development.local -- yarn tauri dev
   ```
 
+## Before finishing a branch
+
+In the `superpowers` workflow, after every task is done and the whole-branch code review is finished, do this **before** `finishing-a-development-branch`:
+
+1. List the UI files this branch changed: `git diff <base>...HEAD --name-only` (`<base>` is `develop` for `feature/*`, `main` for `hotfix/*`). UI files are `src/**/*.{tsx,css}` and `src/shared/i18n/{en,ko}.ts`.
+2. If any UI file changed, run the `better-interface` skill from `jakubkrehel/skills` (it covers the other `better-*` skills in one ranked report), scoped to the screens and components this branch changed. Don't review screens the branch didn't touch. If the skill isn't installed, stop and tell the user; don't skip the step.
+3. Treat `HIGH` findings like Critical/Important code-review findings: fix them, then rerun the five checks in [testing](docs/agents/testing.md) and recheck light/dark and ko/en. Report the rest as a list; don't fix them.
+4. Never make a design change the plan doesn't contain without asking first. This includes a `HIGH` fix that changes how the UI looks (tokens, colors, layout, copy).
+
 ## Map
 
 ### Foundations
