@@ -33,8 +33,8 @@ The key pair is made once per app with the Tauri CLI. The private half lives onl
 
 - **Never run the release scripts or `gh release` commands without the user's explicit request.** They publish to users.
 - **Never run `yarn tauri signer generate` (or change a filled `plugins.updater.pubkey`) without the user's explicit request.** Installed apps only trust the current public key: after a rotation they reject every update signed with the new key, so users must reinstall by hand.
-- The updater signing key comes from the OS secret store: the login keychain through `scripts/load-updater-key-macos.sh` (sourced), and Credential Manager through `scripts/load-updater-key-windows.ps1` (dot-sourced). Neither is run as a child process. Don't go back to a key file or `sign.env`, and don't print the values.
-- macOS notarization uses the **API key** method only (`APPLE_API_KEY`, `APPLE_API_ISSUER`, `APPLE_API_KEY_PATH`, set by `release-macos.sh`). Don't reintroduce `APPLE_ID`/`APPLE_PASSWORD`: if `APPLE_ID` is set, Tauri notarizes with it instead.
+- The updater signing key comes from the OS secret store: the login keychain through `scripts/load-updater-key-macos.sh` (sourced), and Credential Manager through `scripts/load-updater-key-windows.ps1` (dot-sourced). Neither is run as a child process. Never read the key from a file on disk, and don't print the values.
+- macOS notarization uses the **API key** method only (`APPLE_API_KEY`, `APPLE_API_ISSUER`, `APPLE_API_KEY_PATH`, set by `release-macos.sh`). Don't set `APPLE_ID`/`APPLE_PASSWORD`: if `APPLE_ID` is set, Tauri notarizes with it instead.
 - Tauri notarizes only the `.app`; `release-macos.sh` then notarizes and staples the `.dmg` with `notarytool`. Keep that step, or Gatekeeper rejects the downloaded dmg.
 - `scripts/release-macos.sh --build-only` builds and notarizes but uploads nothing. It still talks to Apple, so ask before running it.
 - If you change `productName`, update the file names in `release-macos.sh` and `release-windows.ps1`. `latest-json.mjs` matches on suffix only.

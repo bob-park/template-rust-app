@@ -6,12 +6,10 @@
 
 ### Plan Mode
 
-- 큰 변경(파일 3개 이상 / 새 기능 / 새 도메인 / 마이그레이션)은 plan mode로 진행한다.
+- 큰 변경(파일 3개 이상 / 새 기능 / 새 도메인 / 마이그레이션)은 `superpowers:brainstorming` → plan mode(`superpowers:writing-plans`) → `superpowers:executing-plans` 순서로 진행한다. 그보다 작은 변경은 바로 구현한다.
 
 ### Skill Usage
 
-- 가능하면 `superpowers` 계열 스킬을 우선 사용한다.
-- 새 기능과 리팩토링은 `superpowers:brainstorming` → `superpowers:writing-plans` → `superpowers:executing-plans` 순서로 진행한다.
 - 디버깅: `superpowers:systematic-debugging`
 - 완료 직전 검증: `superpowers:verification-before-completion`
   - `cargo test --manifest-path src-tauri/Cargo.toml --lib`, `cargo fmt --manifest-path src-tauri/Cargo.toml --check`, `yarn test`, `yarn typecheck`, `yarn lint`를 모두 통과해야 한다.
@@ -20,6 +18,7 @@
 ### UI 작업
 
 - UI를 만들거나 바꾸기 전에 반드시 `docs/design/`과 [design](docs/agents/design.md)을 먼저 읽는다.
+- 새 화면이나 레이아웃·시각 디자인이 바뀌는 작업은 구현 전에 `ui-ux-pro-max` 스킬로 목업 3안을 만들어 `superpowers` visual companion으로 보여준다. 문구 수정이나 기존 패턴을 그대로 따르는 작은 변경에는 필요 없다.
 - 화면을 바꾸면 `yarn dotenv -e .env.development.local -- yarn tauri dev`로 띄워서 직접 본다. 라이트/다크 두 테마와 한국어/English 두 언어를 모두 확인한다.
 
 ### Language
