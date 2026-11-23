@@ -24,10 +24,12 @@ related:
 | Styling | Tailwind CSS 4 (`@tailwindcss/vite`) + daisyUI 5, `classnames` | `package.json` |
 | Server state | `@tanstack/react-query` 5 (+ devtools in dev) | `package.json` |
 | Client state | `zustand` 5 + `immer` | `package.json` |
-| Lint/format | ESLint 9 + `@bob-park/eslint-config-bobpark`, Prettier + `@bob-park/prettier-config-bobpark` (GitHub Packages) | `package.json`, `eslint.config.mjs`, `.yarnrc.yml` |
+| Lint/format | ESLint 9 + `@bob-park/eslint-config-bobpark` 1, Prettier 3 + `@bob-park/prettier-config-bobpark` 1 (GitHub Packages) | `package.json`, `eslint.config.mjs`, `.yarnrc.yml` |
+| Dev env | `dotenv-cli` (loads `.env.development.local` for the dev run) | `package.json` |
 | Tests | `cargo test`, Node built-in `node:test` | — |
 
 Notes:
 
-- TypeScript stays on 6.x: `typescript-eslint` (pulled in by the bobpark ESLint config) does not support TS 7 yet.
-- `.yarnrc.yml` sets `npmMinimalAgeGate: 0` (no age gate) and `enableScripts: true` (dependency install scripts run).
+- TypeScript stays on 6.x: `typescript-eslint` 8 (pulled in by the bobpark ESLint config) accepts `typescript` `<6.1.0` in its peer range. Check that range before bumping TypeScript.
+- `eslint.config.mjs` overrides one rule: `no-void` allows `void` as a statement, because `no-floating-promises` asks for it on fire-and-forget promises.
+- `.yarnrc.yml` sets `npmMinimalAgeGate: 0` (no age gate, globally and for the `@bob-park` scope) and `enableScripts: true` (dependency install scripts run).
